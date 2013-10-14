@@ -23,8 +23,6 @@ import java.util.regex.Pattern;
  * To change this template use File | Settings | File Templates.
  */
 
-// TODO: add host/port/timeout config
-// TODO: add keyspace stats
 // TODO: number of gets/puts?
 // TODO: number of keys?
 
