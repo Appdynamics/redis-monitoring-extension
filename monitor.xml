@@ -1,0 +1,26 @@
+<monitor>
+    <name>RedisMonitor</name>
+    <type>managed</type>
+    <enabled>true</enabled>
+    <description>Monitors a Redis key-value-store server.</description>
+    <monitor-configuration>
+    </monitor-configuration>
+    <monitor-run-task>
+        <name>RedisMonitor Run Task</name>
+        <display-name>RedisMonitor Run Task</display-name>
+        <description>RedisMonitor Run Task</description>
+        <type>java</type>
+        <execution-style>periodic</execution-style>
+        <execution-frequency-in-seconds>5</execution-frequency-in-seconds>
+        <task-arguments>
+            <argument name="host" is-required="false" default-value="localhost" />
+            <argument name="port" is-required="false" default-value="6379" />
+            <argument name="password" is-required="false" default-value="" />
+            <argument name="keyspaces" is-required="false" default-value="db0,db1" />
+        </task-arguments>
+        <java-task>
+            <classpath>RedisMonitor.jar</classpath>
+            <impl-class>com.singularity.ee.agent.systemagent.monitors.RedisMonitor</impl-class>
+        </java-task>
+    </monitor-run-task>
+</monitor>
