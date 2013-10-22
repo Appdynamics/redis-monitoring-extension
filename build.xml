@@ -1,5 +1,6 @@
 <project default="build">
     <property name="build.dir" value="dist" />
+    <property name="conf.dir" value="conf" />
     <property name="project.name" value="RedisMonitor"/>
     <property name="lib.dir" value="lib"/>
     <path id="cp">
@@ -7,13 +8,19 @@
     </path>
     <target name="build">
         <mkdir dir="${build.dir}/classes"/>
-        <javac target="1.5" destdir="${build.dir}/classes" srcdir="src" classpathref="cp" debug="on"/>
+        <javac target="1.5" destdir="${build.dir}/classes" srcdir="src/main/java" classpathref="cp" debug="on"/>
         <mkdir dir="${build.dir}/RedisMonitor"/>
         <jar destfile="${build.dir}/RedisMonitor/${project.name}.jar">
             <fileset dir="${build.dir}/classes"/>
         </jar>
         <copy todir="${build.dir}/RedisMonitor/">
-            <fileset dir="${basedir}" includes="monitor.xml"/>
+            <fileset dir="${conf.dir}" includes="*"/>
+        </copy>
+        <copy todir="${build.dir}/RedisMonitor/lib/">
+            <fileset dir="${lib.dir}" includes="commons/*"/>
+        </copy>
+        <copy todir="${build.dir}/RedisMonitor/lib/">
+            <fileset dir="${lib.dir}" includes="jedis/*"/>
         </copy>
         <delete dir="${build.dir}/classes"/>
     </target>
