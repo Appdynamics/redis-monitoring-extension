@@ -1,0 +1,29 @@
+<project default="build">
+    <property name="build.dir" value="dist" />
+    <property name="project.name" value="RedisMonitor"/>
+    <property name="lib.dir" value="lib"/>
+    <path id="cp">
+        <fileset dir="${lib.dir}" includes="**/*.jar"/>
+    </path>
+    <target name="build">
+        <mkdir dir="${build.dir}/classes"/>
+        <javac target="1.5" destdir="${build.dir}/classes" srcdir="src" classpathref="cp" debug="on"/>
+        <mkdir dir="${build.dir}/RedisMonitor"/>
+        <jar destfile="${build.dir}/RedisMonitor/${project.name}.jar">
+            <fileset dir="${build.dir}/classes"/>
+        </jar>
+        <copy todir="${build.dir}/RedisMonitor/">
+            <fileset dir="${basedir}" includes="monitor.xml"/>
+        </copy>
+        <delete dir="${build.dir}/classes"/>
+    </target>
+    <target name="package" depends="build">
+        <zip destfile="${build.dir}/RedisMonitor.zip">
+            <zipfileset dir="${build.dir}/RedisMonitor" filemode="755" prefix="RedisMonitor"/>
+        </zip>
+        <delete dir="${build.dir}/RedisMonitor"/>
+    </target>
+    <target name="clean">
+        <delete dir="${build.dir}"/>
+    </target>
+</project>
