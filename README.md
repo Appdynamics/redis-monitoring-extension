@@ -20,3 +20,6 @@ number of keys and number of expired keys:
 ``` xml
             <argument name="keyspaces" is-required="false" default-value="db0,db1" />
 ```
+Custom Dashboard
+-----------------
+![](https://raw.github.com/Appdynamics/redis-monitoring-extension/master/RedisDashboard.PNG)
