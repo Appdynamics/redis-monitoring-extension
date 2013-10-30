@@ -92,13 +92,13 @@ public class RedisMonitor extends AManagedMonitor {
         getTaskParams(taskParams);
 
         Jedis jedis = new Jedis(host, port);
-        if (password != null && ! password.isEmpty()) {
+        if (password != null && password.length() != 0) {
             jedis.auth(password);
         }
 
         currentMap.clear();
         for (String info : jedis.info().split("\r\n")) {
-            if (! info.startsWith("#") && ! info.isEmpty()) {
+            if (! info.startsWith("#") && info.length() != 0) {
                 String[] kv = info.split(":");
                 currentMap.put(kv[0], kv[1]);
             }
