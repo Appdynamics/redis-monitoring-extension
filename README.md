@@ -24,6 +24,18 @@ AppDynamics Machine Agent plugin to monitor a Redis server.
 5. Restart the machineagent
 6. In the AppDynamics Metric Browser, look for: Application Infrastructure Performance | \<Tier\> | Custom Metrics | Redis
 
+## Metrics
+
+- Commands processed
+- Connected clients
+- Connected slaves
+- Connections received
+- Evicted keys
+- Expired keys
+- Kepspace hits
+- Kepspace misses
+- Rejected connections
+- Used memory (KB)
 
 Custom Dashboard
 -----------------
