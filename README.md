@@ -1,9 +1,18 @@
 RedisMonitor
 ============
+This eXtension works only with the Java agent.
 
 ## Use Case
 
-AppDynamics Machine Agent plugin to monitor a Redis server.
+Redis is an in memory key-value data store. The Redis monitoring extension gathers Redis server statistics and display them in AppDynamics Metric Browser.
+
+Metrics include:
+- Connection count, connected clients, slaves, rejected connection count
+- Command count
+- Keyspace hits and misses
+- Memory usage
+- Evicted keys
+- Expired keys
 
 ## Installation
 <ol>
