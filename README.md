@@ -6,23 +6,35 @@ RedisMonitor
 AppDynamics Machine Agent plugin to monitor a Redis server.
 
 ## Installation
+<ol>
+	<li>Type 'ant package' in the command line from the redis-monitoring-extension directory.
+	</li>
+	<li>Deploy the file RedisMonitor.zip found in the 'dist' directory into the &lt;machineagent install dir&gt;/monitors/ directory.
+	</li>
+	<li>Unzip the deployed file.
+	</li>
+	<li>Open &lt;machineagent install dir&gt;/monitors/RedisMonitor/monitor.xml and configure the Redis credentials.
+<p></p>
+<pre>
+	&lt;argument name="host" is-required="false" default-value="localhost" /&gt;          
+	&lt;argument name="port" is-required="false" default-value="6379" /&gt;
+	&lt;argument name="password" is-required="false" default-value="" /&gt;
+</pre>
+ 
+You can also set the 'keyspaces' argument to a comma-separated list of keyspaces, and the plugin will report the number of keys and number of expired keys:
+<p>
+</p>
+<pre>
+	&lt;argument name="keyspaces" is-required="false" default-value="db0,db1" /&gt;
+</pre>
 
-1. Run ```ant package``` from the redis-monitoring-extension directory
-2. Deploy the file RedisMonitor.zip found in the 'dist' directory into ```<machineagent install dir>/monitors/```
-3. Unzip the deployed file
-4. Open ```<machineagent install dir>/monitors/RedisMonitor/monitor.xml``` and configure the Redis credentials
+	</li>	
+	<li> Restart the machine agent.
+	</li>
+	<li>In the AppDynamics Metric Browser, look for: Application Infrastructure Performance | &lt;Tier&gt; | Custom Metrics | Redis
+	</li>
+</ol>
 
- ``` xml
-            <argument name="host" is-required="false" default-value="localhost" />
-            <argument name="port" is-required="false" default-value="6379" />
-            <argument name="password" is-required="false" default-value="" />
- ```
- You can also set the `keyspaces` argument to a comma-separated list of keyspaces, and the plugin will report the number of keys and number of expired keys:
- ``` xml
-            <argument name="keyspaces" is-required="false" default-value="db0,db1" />
- ```
-5. Restart the machineagent
-6. In the AppDynamics Metric Browser, look for: Application Infrastructure Performance | \<Tier\> | Custom Metrics | Redis
 
 ## Metrics
 
