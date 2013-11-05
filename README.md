@@ -35,19 +35,30 @@ You can also set the 'keyspaces' argument to a comma-separated list of keyspaces
 	</li>
 </ol>
 
+## Directory Structure
+
+| Directory/File | Description |
+|----------------|-------------|
+|conf            | Contains the monitor.xml |
+|lib             | Contains third-party project references |
+|src             | Contains source code of the Redis monitoring extension |
+|dist            | Only obtained when using ant. Run 'ant build' to get binaries. Run 'ant package' to get the distributable .zip file |
+|build.xml       | Ant build script to package the project (required only if changing Java code) |
 
 ## Metrics
 
-- Commands processed
-- Connected clients
-- Connected slaves
-- Connections received
-- Evicted keys
-- Expired keys
-- Kepspace hits
-- Kepspace misses
-- Rejected connections
-- Used memory (KB)
+|Metric Name           | Description     |
+|----------------------|-----------------|
+|commands_processed    | Number of commands processed per minute |
+|connected_clients     | Number of currently connected clients |
+|connected_slaves      | Number of currently connected slaves |
+|connections_received  | Total number of connections received per minute |
+|evicted_keys          | Number of evicted keys per minute |
+|expired_keys          | Number of expired keys per minute |
+|keyspace_hits         | Number of keyspace hits per minute |
+|keyspace_misses       | Number of kepspace misses per minute |
+|rejected_connections  | Number of rejected connections per minute |
+|used_memory           | Total memory used (KB) |
 
 Custom Dashboard
 -----------------
