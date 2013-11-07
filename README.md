@@ -1,6 +1,6 @@
-RedisMonitor
+Redis Monitor
 ============
-This eXtension works only with the Java agent.
+This extension works only with the Java agent.
 
 ## Use Case
 
@@ -36,8 +36,7 @@ You can also set the 'keyspaces' argument to a comma-separated list of keyspaces
 <pre>
 	&lt;argument name="keyspaces" is-required="false" default-value="db0,db1" /&gt;
 </pre>
-
-	</li>	
+        </li>	
 	<li> Restart the machine agent.
 	</li>
 	<li>In the AppDynamics Metric Browser, look for: Application Infrastructure Performance | &lt;Tier&gt; | Custom Metrics | Redis
@@ -69,6 +68,6 @@ You can also set the 'keyspaces' argument to a comma-separated list of keyspaces
 |rejected_connections  | Number of rejected connections per minute |
 |used_memory           | Total memory used (KB) |
 
-Custom Dashboard
------------------
+Custom Dashboard Example
+------------------------
 ![](https://raw.github.com/Appdynamics/redis-monitoring-extension/master/RedisDashboard.PNG)
