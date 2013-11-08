@@ -71,3 +71,17 @@ You can also set the 'keyspaces' argument to a comma-separated list of keyspaces
 Custom Dashboard Example
 ------------------------
 ![](https://raw.github.com/Appdynamics/redis-monitoring-extension/master/RedisDashboard.PNG)
+
+
+##Contributing
+
+Always feel free to fork and contribute any changes directly via [GitHub](https://github.com/Appdynamics/redis-monitoring-extension).
+
+##Community
+
+Find out more in the [AppSphere](http://appsphere.appdynamics.com/t5/eXchange/Redis---Monitoring-Extension/idi-p/4505) community.
+
+##Support
+
+For any questions or feature request, please contact [AppDynamics Center of Excellence](mailto:ace-request@appdynamics.com).
+
