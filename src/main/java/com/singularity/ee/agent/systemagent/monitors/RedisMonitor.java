@@ -90,57 +90,63 @@ public class RedisMonitor extends AManagedMonitor {
     @Override
     public TaskOutput execute(Map<String, String> taskParams, TaskExecutionContext taskExecutionContext) throws TaskExecutionException {
         getTaskParams(taskParams);
-
         Jedis jedis = new Jedis(host, port);
-        if (password != null && password.length() != 0) {
-            jedis.auth(password);
-        }
-
-        currentMap.clear();
-        for (String info : jedis.info().split("\r\n")) {
-            if (! info.startsWith("#") && info.length() != 0) {
-                String[] kv = info.split(":");
-                currentMap.put(kv[0], kv[1]);
+        try{
+            if (password != null && password.length() != 0) {
+                jedis.auth(password);
             }
-        }
 
-        logger.info("gathering stats from Redis server");
-
-        getMetricWriter("used_memory", "OBSERVATION", "CURRENT", "INDIVIDUAL").printMetric(currentMap.get("used_memory"));
-        getMetricWriter("connections_received", "SUM", "SUM", "COLLECTIVE").printMetric(getDeltaString("total_connections_received"));
-        getMetricWriter("commands_processed", "SUM", "SUM", "COLLECTIVE").printMetric(getDeltaString("total_commands_processed"));
-        getMetricWriter("rejected_connections", "SUM", "SUM", "COLLECTIVE").printMetric(getDeltaString("rejected_connections"));
-        getMetricWriter("expired_keys", "SUM", "SUM", "COLLECTIVE").printMetric(getDeltaString("expired_keys"));
-        getMetricWriter("evicted_keys", "SUM", "SUM", "COLLECTIVE").printMetric(getDeltaString("evicted_keys"));
-        getMetricWriter("keyspace_hits", "SUM", "SUM", "COLLECTIVE").printMetric(getDeltaString("keyspace_hits"));
-        getMetricWriter("keyspace_misses", "SUM", "SUM", "COLLECTIVE").printMetric(getDeltaString("keyspace_misses"));
-        getMetricWriter("connected_slaves", "OBSERVATION", "CURRENT", "COLLECTIVE").printMetric(currentMap.get("connected_slaves"));
-        getMetricWriter("connected_clients", "OBSERVATION", "CURRENT", "COLLECTIVE").printMetric(currentMap.get("connected_clients"));
-
-        for (String keyspace : keyspaces) {
-            logger.info("gathering stats for keyspace " + keyspace);
-            if (currentMap.containsKey(keyspace)) {
-                Matcher m = keyspacePattern.matcher(currentMap.get(keyspace));
-                if (m.matches()) {
-                    int keyCurrent = Integer.parseInt(m.group(1));
-                    int expireCurrent = Integer.parseInt(m.group(2));
-                    if (lastMap.containsKey(keyspace)) {
-                        m = keyspacePattern.matcher(lastMap.get(keyspace));
-                        if (m.matches()) {
-                            int keyLast = Integer.parseInt(m.group(1));
-                            int expireLast = Integer.parseInt(m.group(2));
-                            int keyDelta = keyCurrent - keyLast;
-                            int expireDelta = expireCurrent - expireLast;
-                            getMetricWriter(keyspace + "|keys", "SUM", "SUM", "COLLECTIVE").printMetric(Integer.toString(keyDelta));
-                            getMetricWriter(keyspace + "|expired", "SUM", "SUM", "COLLECTIVE").printMetric(Integer.toString(expireDelta));
-                        }
-                    }
+            currentMap.clear();
+            for (String info : jedis.info().split("\r\n")) {
+                if (!info.startsWith("#") && info.length() != 0) {
+                    String[] kv = info.split(":");
+                    currentMap.put(kv[0], kv[1]);
                 }
             }
 
+            logger.info("gathering stats from Redis server");
+
+            getMetricWriter("used_memory", "OBSERVATION", "CURRENT", "INDIVIDUAL").printMetric(currentMap.get("used_memory"));
+            getMetricWriter("connections_received", "SUM", "SUM", "COLLECTIVE").printMetric(getDeltaString("total_connections_received"));
+            getMetricWriter("commands_processed", "SUM", "SUM", "COLLECTIVE").printMetric(getDeltaString("total_commands_processed"));
+            getMetricWriter("rejected_connections", "SUM", "SUM", "COLLECTIVE").printMetric(getDeltaString("rejected_connections"));
+            getMetricWriter("expired_keys", "SUM", "SUM", "COLLECTIVE").printMetric(getDeltaString("expired_keys"));
+            getMetricWriter("evicted_keys", "SUM", "SUM", "COLLECTIVE").printMetric(getDeltaString("evicted_keys"));
+            getMetricWriter("keyspace_hits", "SUM", "SUM", "COLLECTIVE").printMetric(getDeltaString("keyspace_hits"));
+            getMetricWriter("keyspace_misses", "SUM", "SUM", "COLLECTIVE").printMetric(getDeltaString("keyspace_misses"));
+            getMetricWriter("connected_slaves", "OBSERVATION", "CURRENT", "COLLECTIVE").printMetric(currentMap.get("connected_slaves"));
+            getMetricWriter("connected_clients", "OBSERVATION", "CURRENT", "COLLECTIVE").printMetric(currentMap.get("connected_clients"));
+
+            for (String keyspace : keyspaces) {
+                logger.info("gathering stats for keyspace " + keyspace);
+                if (currentMap.containsKey(keyspace)) {
+                    Matcher m = keyspacePattern.matcher(currentMap.get(keyspace));
+                    if (m.matches()) {
+                        int keyCurrent = Integer.parseInt(m.group(1));
+                        int expireCurrent = Integer.parseInt(m.group(2));
+                        if (lastMap.containsKey(keyspace)) {
+                            m = keyspacePattern.matcher(lastMap.get(keyspace));
+                            if (m.matches()) {
+                                int keyLast = Integer.parseInt(m.group(1));
+                                int expireLast = Integer.parseInt(m.group(2));
+                                int keyDelta = keyCurrent - keyLast;
+                                int expireDelta = expireCurrent - expireLast;
+                                getMetricWriter(keyspace + "|keys", "SUM", "SUM", "COLLECTIVE").printMetric(Integer.toString(keyDelta));
+                                getMetricWriter(keyspace + "|expired", "SUM", "SUM", "COLLECTIVE").printMetric(Integer.toString(expireDelta));
+                            }
+                        }
+                    }
+                }
+
+            }
+
+            lastMap = new HashMap<String, String>(currentMap);
+        } finally{
+            if(jedis.isConnected()){
+                jedis.disconnect();
+            }
         }
 
-        lastMap = new HashMap<String, String>(currentMap);
         return new TaskOutput("Success");
     }
 
