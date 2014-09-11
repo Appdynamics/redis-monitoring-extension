@@ -1,9 +1,0 @@
-<component name="libraryTable">
-  <library name="machineagent">
-    <CLASSES>
-      <root url="jar://$PROJECT_DIR$/lib/machineagent/machineagent.jar!/" />
-    </CLASSES>
-    <JAVADOC />
-    <SOURCES />
-  </library>
-</component>
