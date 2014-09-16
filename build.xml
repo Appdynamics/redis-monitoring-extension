@@ -3,6 +3,7 @@
     <property name="conf.dir" value="conf" />
     <property name="project.name" value="RedisMonitor"/>
     <property name="lib.dir" value="lib"/>
+    <property name="version" value="1.0.1"/>
     <path id="cp">
         <fileset dir="${lib.dir}" includes="**/*.jar"/>
     </path>
@@ -25,7 +26,7 @@
         <delete dir="${build.dir}/classes"/>
     </target>
     <target name="package" depends="build">
-        <zip destfile="${build.dir}/RedisMonitor.zip">
+        <zip destfile="${build.dir}/RedisMonitor-${version}.zip">
             <zipfileset dir="${build.dir}/RedisMonitor" filemode="755" prefix="RedisMonitor"/>
         </zip>
         <delete dir="${build.dir}/RedisMonitor"/>

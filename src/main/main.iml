@@ -8,9 +8,9 @@
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="machineagent" level="project" />
+    <orderEntry type="library" name="log4j-1.2.15" level="project" />
     <orderEntry type="library" name="jedis-2.1.0" level="project" />
     <orderEntry type="library" name="commons-lang-2.4" level="project" />
-    <orderEntry type="library" name="log4j-1.2.15" level="project" />
   </component>
 </module>
 
