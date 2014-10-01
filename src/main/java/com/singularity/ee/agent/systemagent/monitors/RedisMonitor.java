@@ -45,7 +45,7 @@ public class RedisMonitor extends AManagedMonitor {
             long lastVal = Long.parseLong(lastMap.get(key));
             return currentVal - lastVal;
         } catch (NumberFormatException e) {
-          //  e.printStackTrace();
+            //  e.printStackTrace();
             return 0;
         }
     }
@@ -116,6 +116,27 @@ public class RedisMonitor extends AManagedMonitor {
             getMetricWriter("keyspace_misses", "SUM", "SUM", "COLLECTIVE").printMetric(getDeltaString("keyspace_misses"));
             getMetricWriter("connected_slaves", "OBSERVATION", "CURRENT", "COLLECTIVE").printMetric(currentMap.get("connected_slaves"));
             getMetricWriter("connected_clients", "OBSERVATION", "CURRENT", "COLLECTIVE").printMetric(currentMap.get("connected_clients"));
+            getMetricWriter("used_memory_rss", "OBSERVATION", "CURRENT", "COLLECTIVE").printMetric(currentMap.get("used_memory_rss"));
+            getMetricWriter("instantaneous_ops_per_sec", "OBSERVATION", "CURRENT", "COLLECTIVE").printMetric(currentMap.get("instantaneous_ops_per_sec"));
+
+            String role = currentMap.get("role");
+            String roleValue = "0";
+            if(role.equals("master"))
+            {
+                roleValue = "1";
+            }
+            else if (role.equals("slave"))
+            {
+                roleValue = "2";
+            }
+            else if (role.equals("sentinel"))
+            {
+                roleValue = "3";
+            }
+            getMetricWriter("role", "OBSERVATION", "CURRENT", "COLLECTIVE").printMetric(roleValue);
+
+
+
 
             for (String keyspace : keyspaces) {
                 logger.info("gathering stats for keyspace " + keyspace);
