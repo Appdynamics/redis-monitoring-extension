@@ -3,7 +3,7 @@
     <property name="conf.dir" value="conf" />
     <property name="project.name" value="RedisMonitor"/>
     <property name="lib.dir" value="lib"/>
-    <property name="version" value="1.0.1"/>
+    <property name="version" value="1.0.2"/>
     <path id="cp">
         <fileset dir="${lib.dir}" includes="**/*.jar"/>
     </path>
