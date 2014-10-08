@@ -1,19 +1,21 @@
-package com.singularity.ee.agent.systemagent.monitors;
-
-import com.singularity.ee.agent.systemagent.api.AManagedMonitor;
-import com.singularity.ee.agent.systemagent.api.MetricWriter;
-import com.singularity.ee.agent.systemagent.api.TaskExecutionContext;
-import com.singularity.ee.agent.systemagent.api.TaskOutput;
-import com.singularity.ee.agent.systemagent.api.exception.TaskExecutionException;
-import org.apache.commons.lang.StringUtils;
-import org.apache.log4j.Logger;
-import redis.clients.jedis.Jedis;
+package com.appdynamics.extensions.redis;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import org.apache.commons.lang.StringUtils;
+import org.apache.log4j.Logger;
+
+import redis.clients.jedis.Jedis;
+
+import com.singularity.ee.agent.systemagent.api.AManagedMonitor;
+import com.singularity.ee.agent.systemagent.api.MetricWriter;
+import com.singularity.ee.agent.systemagent.api.TaskExecutionContext;
+import com.singularity.ee.agent.systemagent.api.TaskOutput;
+import com.singularity.ee.agent.systemagent.api.exception.TaskExecutionException;
 
 /**
  * Created with IntelliJ IDEA.
@@ -37,7 +39,13 @@ public class RedisMonitor extends AManagedMonitor {
     private HashMap<String, String> currentMap = new HashMap<String, String>();
     private HashMap<String, String> lastMap = new HashMap<String, String>();
     private final Pattern keyspacePattern = Pattern.compile("^keys=(\\d+),expires=(\\d+)$");
-    private static final Logger logger = Logger.getLogger(RedisMonitor.class);
+    private static final Logger logger = Logger.getLogger("com.singularity.extensions.RedisMonitor");
+    
+    public RedisMonitor() {
+    	String msg = "Using Monitor Version [" + getImplementationVersion() + "]";
+		logger.info(msg);
+		System.out.println(msg);
+	}
 
     public long getDelta(String key) {
         try {
@@ -87,7 +95,6 @@ public class RedisMonitor extends AManagedMonitor {
         }
     }
 
-    @Override
     public TaskOutput execute(Map<String, String> taskParams, TaskExecutionContext taskExecutionContext) throws TaskExecutionException {
         getTaskParams(taskParams);
         Jedis jedis = new Jedis(host, port);
@@ -100,6 +107,7 @@ public class RedisMonitor extends AManagedMonitor {
             for (String info : jedis.info().split("\r\n")) {
                 if (!info.startsWith("#") && info.length() != 0) {
                     String[] kv = info.split(":");
+                    if(kv.length == 2) 
                     currentMap.put(kv[0], kv[1]);
                 }
             }
@@ -170,10 +178,16 @@ public class RedisMonitor extends AManagedMonitor {
 
         return new TaskOutput("Success");
     }
+    
+    private static String getImplementationVersion() {
+		return RedisMonitor.class.getPackage().getImplementationTitle();
+	}
 
     public static void main(String[] args) throws InterruptedException {
         Map<String, String> taskParams = new HashMap<String, String>();
         taskParams.put("host", "localhost");
+        taskParams.put("port", "6379");
+        taskParams.put("password", "");
         taskParams.put("keyspaces", "db0,db1");
 
         RedisMonitor m = new RedisMonitor();

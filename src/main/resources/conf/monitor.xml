@@ -19,8 +19,8 @@
             <argument name="keyspaces" is-required="false" default-value="db0,db1" />
         </task-arguments>
         <java-task>
-            <classpath>RedisMonitor.jar;lib/commons/commons-lang-2.4.jar;lib/jedis/jedis-2.1.0.jar</classpath>
-            <impl-class>com.singularity.ee.agent.systemagent.monitors.RedisMonitor</impl-class>
+            <classpath>redis-monitoring-extension.jar</classpath>
+            <impl-class>com.appdynamics.extensions.redis.RedisMonitor</impl-class>
         </java-task>
     </monitor-run-task>
 </monitor>

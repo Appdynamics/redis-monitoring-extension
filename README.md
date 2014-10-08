@@ -16,9 +16,9 @@ Metrics include:
 
 ## Installation
 <ol>
-	<li>Type 'ant package' in the command line from the redis-monitoring-extension directory.
+	<li>Type 'mvn clean install' in the command line from the redis-monitoring-extension directory.
 	</li>
-	<li>Deploy the file RedisMonitor.zip found in the 'dist' directory into the &lt;machineagent install dir&gt;/monitors/ directory.
+	<li>Deploy the file RedisMonitor.zip found in the 'target' directory into the &lt;machineagent install dir&gt;/monitors/ directory.
 	</li>
 	<li>Unzip the deployed file.
 	</li>
@@ -42,16 +42,6 @@ You can also set the 'keyspaces' argument to a comma-separated list of keyspaces
 	<li>In the AppDynamics Metric Browser, look for: Application Infrastructure Performance | &lt;Tier&gt; | Custom Metrics | Redis
 	</li>
 </ol>
-
-## Directory Structure
-
-| Directory/File | Description |
-|----------------|-------------|
-|conf            | Contains the monitor.xml |
-|lib             | Contains third-party project references |
-|src             | Contains source code of the Redis monitoring extension |
-|dist            | Only obtained when using ant. Run 'ant build' to get binaries. Run 'ant package' to get the distributable .zip file |
-|build.xml       | Ant build script to package the project (required only if changing Java code) |
 
 ## Metrics
 
@@ -83,5 +73,5 @@ Find out more in the [AppSphere](http://appsphere.appdynamics.com/t5/eXchange/Re
 
 ##Support
 
-For any questions or feature request, please contact [AppDynamics Center of Excellence](mailto:ace-request@appdynamics.com).
+For any questions or feature request, please contact [AppDynamics Support](mailto:help@appdynamics.com).
 
