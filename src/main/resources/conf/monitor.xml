@@ -11,12 +11,10 @@
         <description>RedisMonitor Run Task</description>
         <type>java</type>
         <execution-style>periodic</execution-style>
-        <execution-frequency-in-seconds>5</execution-frequency-in-seconds>
+        <execution-frequency-in-seconds>60</execution-frequency-in-seconds>
+        <execution-timeout-in-secs>60</execution-timeout-in-secs>
         <task-arguments>
-            <argument name="host" is-required="false" default-value="localhost" />
-            <argument name="port" is-required="false" default-value="6379" />
-            <argument name="password" is-required="false" default-value="" />
-            <argument name="keyspaces" is-required="false" default-value="db0,db1" />
+            <argument name="config-file" is-required="true" default-value="monitors/RedisMonitor/config.yml" />
         </task-arguments>
         <java-task>
             <classpath>redis-monitoring-extension.jar</classpath>

@@ -1,0 +1,17 @@
+# List of Redis Servers
+servers:
+  - host: "localhost"
+    port: 6379
+    password: "admin"
+    displayName: "localhost"
+
+    keyspaces: [db0,db1]
+    excludePatterns: [
+            .*tcp_port$,
+            .*master_port$,
+            .*Persistence|.*,
+            .*CPU|.*
+           ]
+
+#prefix used to show up metrics in AppDynamics
+metricPrefix:  "Custom Metrics|Redis|"
