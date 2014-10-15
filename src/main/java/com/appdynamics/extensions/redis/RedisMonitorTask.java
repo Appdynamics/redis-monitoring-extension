@@ -162,7 +162,7 @@ public class RedisMonitorTask {
 		StringBuilder metricPath = new StringBuilder();
 		metricPath.append(Strings.isNullOrEmpty(server.getDisplayName()) ? "" : server.getDisplayName() + METRIC_SEPARATOR);
 		metricPath.append(Strings.isNullOrEmpty(categoryName) ? "" : categoryName + METRIC_SEPARATOR);
-		metricPath.append(Strings.isNullOrEmpty(metricName) ? "" : metricName + METRIC_SEPARATOR);
+		metricPath.append(metricName);
 		return metricPath.toString();
 	}
 
