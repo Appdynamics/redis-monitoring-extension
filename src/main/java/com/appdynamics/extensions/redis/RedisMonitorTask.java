@@ -17,8 +17,6 @@ package com.appdynamics.extensions.redis;
 
 import java.util.Map;
 import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import org.apache.log4j.Logger;
 
@@ -30,14 +28,17 @@ import com.appdynamics.extensions.NumberUtils;
 import com.appdynamics.extensions.redis.config.RedisMetrics;
 import com.appdynamics.extensions.redis.config.Server;
 import com.appdynamics.extensions.util.MetricUtils;
+import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
 import com.google.common.collect.Maps;
 
 public class RedisMonitorTask {
+	private static final String COMMA_SEPARATOR = ",";
+	private static final String COLON_SEPARATOR = ":";
+	private static final String EQUALS_SEPARATOR = "=";
 	public static final String METRIC_SEPARATOR = "|";
 	private Logger logger = Logger.getLogger("com.singularity.extensions.RedisMonitorTask");
 	private Server server;
-	private final Pattern keyspacePattern = Pattern.compile("^keys=(\\d+),expires=(\\d+),avg_ttl=(\\d+)");
 
 	public RedisMonitorTask(Server server) {
 		this.server = server;
@@ -48,10 +49,12 @@ public class RedisMonitorTask {
 		try {
 			String info = connectAndGetInfoResponse();
 			metricsForAServer = parseInfoString(info);
-			metricsForAServer.getMetrics().put(server.getDisplayName() + METRIC_SEPARATOR + RedisMonitorConstants.METRICS_COLLECTION_STATUS, RedisMonitorConstants.SUCCESS_VALUE);
+			metricsForAServer.getMetrics().put(server.getDisplayName() + METRIC_SEPARATOR + RedisMonitorConstants.METRICS_COLLECTION_STATUS,
+					RedisMonitorConstants.SUCCESS_VALUE);
 		} catch (Exception e) {
 			logger.error(e);
-			metricsForAServer.getMetrics().put(server.getDisplayName() + METRIC_SEPARATOR + RedisMonitorConstants.METRICS_COLLECTION_STATUS, RedisMonitorConstants.ERROR_VALUE);
+			metricsForAServer.getMetrics().put(server.getDisplayName() + METRIC_SEPARATOR + RedisMonitorConstants.METRICS_COLLECTION_STATUS,
+					RedisMonitorConstants.ERROR_VALUE);
 		}
 		return metricsForAServer;
 	}
@@ -93,26 +96,27 @@ public class RedisMonitorTask {
 		Map<String, String> metrics = Maps.newHashMap();
 		String categoryName = "";
 		Set<String> excludePatterns = server.getExcludePatterns();
-		for (String line : info.split("\r\n")) {
-			if (line.startsWith("#")) {             // Every Category of metrics starts with # like #Memory
-				categoryName = line.substring(1).trim();
+		Splitter lineSplitter = Splitter.on(System.lineSeparator()).trimResults().omitEmptyStrings();
+		for (String currentLine : lineSplitter.split(info)) {
+			if (currentLine.startsWith("#")) { // Every Category of metrics
+												// starts with # like #Memory
+				categoryName = currentLine.substring(1).trim();
 				continue; // No need to go through if the line starts with a #
 			}
-			if (line.length() != 0) {
-				String[] kv = line.split(":");
-				if (kv.length == 2) { 
-					String key = kv[0].trim();
-					String metricPath = getMetricPath(categoryName, key);
-					if (!isKeyExcluded(metricPath, excludePatterns)) { // 
-						String value = kv[1].trim();
-						if (NumberUtils.isNumber(value)) {
-							metrics.put(metricPath, MetricUtils.toWholeNumberString(Double.parseDouble(value)));
-							continue; // No need to procees further if the value is a Number
-						}
-						setRole(metrics, key, metricPath, value);
-						setMasterLinkStatus(metrics, key, metricPath, value);
-						setKeySpaceMetrics(metrics, metricPath, value);
+			String[] kv = currentLine.split(COLON_SEPARATOR);
+			if (kv.length == 2) {
+				String key = kv[0].trim();
+				String metricPath = getMetricPath(categoryName, key);
+				if (!isKeyExcluded(metricPath, excludePatterns)) { //
+					String value = kv[1].trim();
+					if (NumberUtils.isNumber(value)) {
+						metrics.put(metricPath, MetricUtils.toWholeNumberString(Double.parseDouble(value)));
+						continue; // No need to procees further if the value is
+									// a Number
 					}
+					setRole(metrics, key, metricPath, value);
+					setMasterLinkStatus(metrics, key, metricPath, value);
+					setKeySpaceMetrics(metrics, key, metricPath, value);
 				}
 			}
 		}
@@ -121,9 +125,9 @@ public class RedisMonitorTask {
 	}
 
 	private void setMasterLinkStatus(Map<String, String> metrics, String key, String metricPath, String value) {
-		if(key.equals("master_link_status")) {
+		if ("master_link_status".equals(key)) {
 			String status = "0";
-			if(value.equals("up")) {
+			if (value.equals("up")) {
 				status = "1";
 			}
 			metrics.put(metricPath, status);
@@ -131,25 +135,25 @@ public class RedisMonitorTask {
 	}
 
 	private void setRole(Map<String, String> metrics, String key, String metricPath, String value) {
-		if("role".equals(key)) {
+		if ("role".equals(key)) {
 			String roleValue = "0";
-			if(value.equals("master")) {
+			if (value.equals("master")) {
 				roleValue = "1";
 			}
 			metrics.put(metricPath, roleValue);
 		}
 	}
 
-	private void setKeySpaceMetrics(Map<String, String> metrics, String metricPath, String value) {
+	private void setKeySpaceMetrics(Map<String, String> metrics, String key, String metricPath, String value) {
 		for (String keyspace : server.getKeyspaces()) {
-			logger.debug("gathering stats for keyspace " + keyspace);
-			Matcher m = keyspacePattern.matcher(value);
-			if (m.matches()) {
-				String keysValue = m.group(1);
-				String expiresValue = m.group(2);
+			if (keyspace.equals(key)) {
+				logger.debug("gathering stats for keyspace " + keyspace);
+				Splitter metricsSplitter = Splitter.on(COMMA_SEPARATOR).trimResults();
 				String keySpaceMetricPath = metricPath + METRIC_SEPARATOR;
-				metrics.put(keySpaceMetricPath + "keys", keysValue);
-				metrics.put(keySpaceMetricPath + "expires", expiresValue);
+				for (String metric : metricsSplitter.split(value)) {
+					String[] keyValue = metric.split(EQUALS_SEPARATOR);
+					metrics.put(keySpaceMetricPath + keyValue[0].trim(), keyValue[1].trim());
+				}
 			}
 		}
 	}
@@ -158,7 +162,7 @@ public class RedisMonitorTask {
 		StringBuilder metricPath = new StringBuilder();
 		metricPath.append(Strings.isNullOrEmpty(server.getDisplayName()) ? "" : server.getDisplayName() + METRIC_SEPARATOR);
 		metricPath.append(Strings.isNullOrEmpty(categoryName) ? "" : categoryName + METRIC_SEPARATOR);
-		metricPath.append(metricName);
+		metricPath.append(Strings.isNullOrEmpty(metricName) ? "" : metricName + METRIC_SEPARATOR);
 		return metricPath.toString();
 	}
 

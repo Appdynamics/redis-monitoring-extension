@@ -5,7 +5,7 @@ servers:
     password: ""
     displayName: "localhost"
 
-    keyspaces: [db0,db1]
+    keyspaces: [db0]
     excludePatterns: [
             .*tcp_port$,
             .*master_port$,
