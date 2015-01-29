@@ -37,7 +37,7 @@ public class RedisMonitorTask {
 	private static final String COLON_SEPARATOR = ":";
 	private static final String EQUALS_SEPARATOR = "=";
 	public static final String METRIC_SEPARATOR = "|";
-	private Logger logger = Logger.getLogger("com.singularity.extensions.RedisMonitorTask");
+	private Logger logger = Logger.getLogger(RedisMonitorTask.class);
 	private Server server;
 
 	public RedisMonitorTask(Server server) {
@@ -52,7 +52,7 @@ public class RedisMonitorTask {
 			metricsForAServer.getMetrics().put(server.getDisplayName() + METRIC_SEPARATOR + RedisMonitorConstants.METRICS_COLLECTION_STATUS,
 					RedisMonitorConstants.SUCCESS_VALUE);
 		} catch (Exception e) {
-			logger.error(e);
+			logger.error("Exception while gathering metrics for " + server.getDisplayName(), e);
 			metricsForAServer.getMetrics().put(server.getDisplayName() + METRIC_SEPARATOR + RedisMonitorConstants.METRICS_COLLECTION_STATUS,
 					RedisMonitorConstants.ERROR_VALUE);
 		}
@@ -72,13 +72,10 @@ public class RedisMonitorTask {
 			info = client.info();
 		} catch (JedisConnectionException e) {
 			logger.error("Error while connecting to Redis Server: ", e);
-			throw new RuntimeException();
+			throw e;
 		} catch (JedisDataException e) {
 			logger.error("Error while authenticating Redis Server: ", e);
-			throw new RuntimeException();
-		} catch (Exception e) {
-			logger.error("Exception: ", e);
-			throw new RuntimeException();
+			throw e;
 		} finally {
 			try {
 				if (client.isConnected()) {
@@ -96,7 +93,7 @@ public class RedisMonitorTask {
 		Map<String, String> metrics = Maps.newHashMap();
 		String categoryName = "";
 		Set<String> excludePatterns = server.getExcludePatterns();
-		Splitter lineSplitter = Splitter.on(System.lineSeparator()).trimResults().omitEmptyStrings();
+		Splitter lineSplitter = Splitter.on(System.getProperty("line.separator")).trimResults().omitEmptyStrings();
 		for (String currentLine : lineSplitter.split(info)) {
 			if (currentLine.startsWith("#")) { // Every Category of metrics
 												// starts with # like #Memory

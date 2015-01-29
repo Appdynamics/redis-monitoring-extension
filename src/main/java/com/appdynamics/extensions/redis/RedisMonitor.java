@@ -39,7 +39,7 @@ public class RedisMonitor extends AManagedMonitor {
 
 	public static final String CONFIG_ARG = "config-file";
 	public static final String METRIC_SEPARATOR = "|";
-	private static final Logger logger = Logger.getLogger("com.singularity.extensions.RedisMonitor");
+	private static final Logger logger = Logger.getLogger(RedisMonitor.class);
 
 	private final static ConfigUtil<Configuration> configUtil = new ConfigUtil<Configuration>();
 
@@ -60,8 +60,8 @@ public class RedisMonitor extends AManagedMonitor {
 				Configuration config = configUtil.readConfig(configFilename, Configuration.class);
 				List<RedisMetrics> metrics = collectMetrics(config);
 				printStats(config, metrics);
-				logger.info("Redis Monitoring Task completed successfully");
-				return new TaskOutput("Redis Monitoring Task completed successfully");
+				logger.info("Redis Monitoring Task completed");
+				return new TaskOutput("Redis Monitoring Task completed");
 			} catch (FileNotFoundException e) {
 				logger.error("Config file not found :: " + configFilename, e);
 			} catch (Exception e) {
@@ -94,13 +94,16 @@ public class RedisMonitor extends AManagedMonitor {
 	}
 
 	private void printAverageAverageIndividual(String metricPath, String metricValue) {
-		printMetric(metricPath, metricValue, MetricWriter.METRIC_AGGREGATION_TYPE_AVERAGE, MetricWriter.METRIC_TIME_ROLLUP_TYPE_AVERAGE,
+		printMetric(metricPath, metricValue, MetricWriter.METRIC_AGGREGATION_TYPE_OBSERVATION, MetricWriter.METRIC_TIME_ROLLUP_TYPE_AVERAGE,
 				MetricWriter.METRIC_CLUSTER_ROLLUP_TYPE_INDIVIDUAL);
 	}
 
 	private void printMetric(String metricPath, String metricValue, String aggregation, String timeRollup, String cluster) {
 		MetricWriter metricWriter = super.getMetricWriter(metricPath, aggregation, timeRollup, cluster);
 		if (metricValue != null) {
+			if(logger.isDebugEnabled()) {
+				logger.debug(metricPath + "   " + metricValue);
+			}
 			metricWriter.printMetric(metricValue);
 		}
 	}
