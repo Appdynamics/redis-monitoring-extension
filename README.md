@@ -23,14 +23,11 @@ Note : Please make sure to not use tab (\t) while editing yaml files. You may wa
             port: 6379
             password: "admin"
             displayName: "localhost"
-          
-            keyspaces: [db0,db1]
+            includePatterns: [
+                       ]
             excludePatterns: [
-                              .*tcp_port$,
-                              .*master_port$,
                               .*Persistence|.*
                              ]
-
         #prefix used to show up metrics in AppDynamics
         metricPrefix:  "Custom Metrics|Redis|"
 
@@ -57,7 +54,8 @@ Some of the metrics are listed below.
 * Persistence
 * Stats
 * Keyspace: keys, expires
-
+* commandstats: cmdstat_set, cmdstat_info, cmdstat_subscribe
+* keyspace_hit_ratio = keyspace_hits/(keyspace_hits + keyspace_misses)
 In addition to the above metrics, we also add a metric called "Metrics Collection Successful" with a value 0 when an error occurs and 1 when the metrics collection is successful.
 
 Note : By default, a Machine agent or a AppServer agent can send a fixed number of metrics to the controller. To change this limit, please follow the instructions mentioned [here](http://docs.appdynamics.com/display/PRO14S/Metrics+Limits).

@@ -23,9 +23,9 @@ public class Server {
 	private String host;
 	private int port;
 	private String password;
-	private Set<String> keyspaces = new HashSet<String>();
 	private String displayName;
 	private Set<String> excludePatterns = new HashSet<String>();
+    private Set<String> includePatterns = new HashSet<String>();
 
 	public String getHost() {
 		return host;
@@ -51,14 +51,6 @@ public class Server {
 		this.password = password;
 	}
 
-	public Set<String> getKeyspaces() {
-		return keyspaces;
-	}
-
-	public void setKeyspaces(Set<String> keyspaces) {
-		this.keyspaces = keyspaces;
-	}
-
 	public String getDisplayName() {
 		return displayName;
 	}
@@ -74,4 +66,12 @@ public class Server {
 	public void setExcludePatterns(Set<String> excludePatterns) {
 		this.excludePatterns = excludePatterns;
 	}
+
+    public Set<String> getIncludePatterns() {
+        return includePatterns;
+    }
+
+    public void setIncludePatterns(Set<String> includePatterns) {
+        this.includePatterns = includePatterns;
+    }
 }

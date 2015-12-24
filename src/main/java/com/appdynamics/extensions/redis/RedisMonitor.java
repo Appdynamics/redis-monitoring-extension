@@ -20,6 +20,7 @@ import java.io.FileNotFoundException;
 import java.util.List;
 import java.util.Map;
 
+import com.appdynamics.extensions.yml.YmlReader;
 import org.apache.log4j.Logger;
 
 import com.appdynamics.extensions.PathResolver;
@@ -38,32 +39,22 @@ import com.singularity.ee.agent.systemagent.api.exception.TaskExecutionException
 public class RedisMonitor extends AManagedMonitor {
 
 	public static final String CONFIG_ARG = "config-file";
-	public static final String METRIC_SEPARATOR = "|";
 	private static final Logger logger = Logger.getLogger(RedisMonitor.class);
 
-	private final static ConfigUtil<Configuration> configUtil = new ConfigUtil<Configuration>();
-
 	public RedisMonitor() {
-		String msg = "Using Monitor Version [" + getImplementationVersion() + "]";
-		logger.info(msg);
-		System.out.println(msg);
+        System.out.println(logVersion());
 	}
 
 	public TaskOutput execute(Map<String, String> taskArguments, TaskExecutionContext taskExecutionContext) throws TaskExecutionException {
 		if (taskArguments != null) {
-			logger.info("Starting Redis Monitoring Task");
-			if (logger.isDebugEnabled()) {
-				logger.debug("Task Arguments Passed ::" + taskArguments);
-			}
-			String configFilename = getConfigFilename(taskArguments.get(CONFIG_ARG));
+            logger.info(logVersion());
 			try {
-				Configuration config = configUtil.readConfig(configFilename, Configuration.class);
+                String configFilename = getConfigFilename(taskArguments.get(CONFIG_ARG));
+				Configuration config = YmlReader.readFromFile(configFilename, Configuration.class);
 				List<RedisMetrics> metrics = collectMetrics(config);
 				printStats(config, metrics);
 				logger.info("Redis Monitoring Task completed");
 				return new TaskOutput("Redis Monitoring Task completed");
-			} catch (FileNotFoundException e) {
-				logger.error("Config file not found :: " + configFilename, e);
 			} catch (Exception e) {
 				logger.error("Metrics collection failed", e);
 			}
@@ -104,7 +95,7 @@ public class RedisMonitor extends AManagedMonitor {
 			if(logger.isDebugEnabled()) {
 				logger.debug(metricPath + "   " + metricValue);
 			}
-			metricWriter.printMetric(metricValue);
+            metricWriter.printMetric(metricValue);
 		}
 	}
 
@@ -134,4 +125,9 @@ public class RedisMonitor extends AManagedMonitor {
 	private static String getImplementationVersion() {
 		return RedisMonitor.class.getPackage().getImplementationTitle();
 	}
+
+    private String logVersion() {
+        String msg = "Using Monitor Version [" + getImplementationVersion() + "]";
+        return msg;
+    }
 }

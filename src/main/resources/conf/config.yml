@@ -1,14 +1,16 @@
-# List of Redis Servers
+# Redis Server particulars
+# includePatterns: metrics to include
+# excludePatterns: metrics to exclude
+# includePatterns has higher precedence than excludePatterns. If includePatterns is empty, then only excludePatterns is honored.
 servers:
   - host: "localhost"
     port: 6379
     password: ""
     displayName: "localhost"
 
-    keyspaces: [db0]
+    includePatterns: [
+           ]
     excludePatterns: [
-            .*tcp_port$,
-            .*master_port$,
             .*Persistence|.*,
             .*CPU|.*
            ]

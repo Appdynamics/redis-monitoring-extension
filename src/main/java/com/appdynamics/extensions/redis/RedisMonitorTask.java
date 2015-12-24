@@ -15,9 +15,13 @@
  */
 package com.appdynamics.extensions.redis;
 
+import java.math.BigDecimal;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
 import org.apache.log4j.Logger;
 
 import redis.clients.jedis.Jedis;
@@ -39,6 +43,8 @@ public class RedisMonitorTask {
 	public static final String METRIC_SEPARATOR = "|";
 	private Logger logger = Logger.getLogger(RedisMonitorTask.class);
 	private Server server;
+    private BigDecimal keyspaceHits;
+    private BigDecimal keyspaceMisses;
 
 	public RedisMonitorTask(Server server) {
 		this.server = server;
@@ -46,22 +52,50 @@ public class RedisMonitorTask {
 
 	public RedisMetrics gatherMetricsForAServer() {
 		RedisMetrics metricsForAServer = new RedisMetrics();
+        Jedis client = null;
 		try {
-			String info = connectAndGetInfoResponse();
-			metricsForAServer = parseInfoString(info);
+            client = buildJedisClient();
+
+            // INFO stats
+            String infoOutput = client.info();
+            Map<String, String> infoMetrics = parseOutputString(infoOutput);
+            metricsForAServer.getMetrics().putAll(infoMetrics);
+
+            // INFO COMMANDSTATS
+            String commandStatsOutput = client.info("commandstats");
+            Map<String, String> commandStatMetrics = parseOutputString(commandStatsOutput);
+            metricsForAServer.getMetrics().putAll(commandStatMetrics);
+
+            if(keyspaceMisses != null && keyspaceHits != null) {
+                String keySpaceHitRatio = computeKeySpaceHitRatio(keyspaceHits, keyspaceMisses);
+                if(!Strings.isNullOrEmpty(keySpaceHitRatio)) {
+                    metricsForAServer.getMetrics().put(server.getDisplayName() + METRIC_SEPARATOR + "keySpaceHitRatio",
+                            keySpaceHitRatio);
+                }
+            }
+
 			metricsForAServer.getMetrics().put(server.getDisplayName() + METRIC_SEPARATOR + RedisMonitorConstants.METRICS_COLLECTION_STATUS,
 					RedisMonitorConstants.SUCCESS_VALUE);
 		} catch (Exception e) {
 			logger.error("Exception while gathering metrics for " + server.getDisplayName(), e);
 			metricsForAServer.getMetrics().put(server.getDisplayName() + METRIC_SEPARATOR + RedisMonitorConstants.METRICS_COLLECTION_STATUS,
 					RedisMonitorConstants.ERROR_VALUE);
-		}
-		return metricsForAServer;
+		} finally {
+            closeJedisClient(client);
+        }
+        return metricsForAServer;
 	}
 
-	private String connectAndGetInfoResponse() {
-		Jedis client = null;
-		String info = "";
+    private String computeKeySpaceHitRatio(BigDecimal keyspaceHits, BigDecimal keyspaceMisses) {
+        if(keyspaceHits.add(keyspaceMisses).compareTo(BigDecimal.ZERO) != 0) {
+            BigDecimal keySpaceHitRatio = keyspaceHits.divide(keyspaceHits.add(keyspaceMisses));
+            return keySpaceHitRatio.toString();
+        }
+        return null;
+    }
+
+    private Jedis buildJedisClient() {
+		Jedis client;
 		try {
 			client = new Jedis(server.getHost(), server.getPort());
 			if (!Strings.isNullOrEmpty(server.getPassword())) {
@@ -69,56 +103,65 @@ public class RedisMonitorTask {
 			} else {
 				logger.debug("Redis Server not authenticated");
 			}
-			info = client.info();
 		} catch (JedisConnectionException e) {
 			logger.error("Error while connecting to Redis Server: ", e);
 			throw e;
 		} catch (JedisDataException e) {
 			logger.error("Error while authenticating Redis Server: ", e);
 			throw e;
-		} finally {
-			try {
-				if (client.isConnected()) {
-					client.close();
-				}
-			} catch (Exception e) {
-				// ignore
-			}
 		}
-		return info;
+		return client;
 	}
 
-	private RedisMetrics parseInfoString(String info) {
-		RedisMetrics metricsForAServer = new RedisMetrics();
+	private Map<String, String> parseOutputString(String info) {
 		Map<String, String> metrics = Maps.newHashMap();
 		String categoryName = "";
 		Set<String> excludePatterns = server.getExcludePatterns();
-		Splitter lineSplitter = Splitter.on(System.getProperty("line.separator")).trimResults().omitEmptyStrings();
+        Set<String> includePatterns = server.getIncludePatterns();
+		Splitter lineSplitter = Splitter.on(System.getProperty("line.separator")).omitEmptyStrings().trimResults();
+        Splitter commaSplitter = Splitter.on(COMMA_SEPARATOR).omitEmptyStrings().trimResults();
 		for (String currentLine : lineSplitter.split(info)) {
-			if (currentLine.startsWith("#")) { // Every Category of metrics
-												// starts with # like #Memory
+			if (currentLine.startsWith("#")) { // Every Category of metrics starts with # like #Memory
 				categoryName = currentLine.substring(1).trim();
 				continue; // No need to go through if the line starts with a #
 			}
-			String[] kv = currentLine.split(COLON_SEPARATOR);
-			if (kv.length == 2) {
-				String key = kv[0].trim();
-				String metricPath = getMetricPath(categoryName, key);
-				if (!isKeyExcluded(metricPath, excludePatterns)) { //
-					String value = kv[1].trim();
-					if (NumberUtils.isNumber(value)) {
-						metrics.put(metricPath, MetricUtils.toWholeNumberString(Double.parseDouble(value)));
-						continue; // No need to procees further if the value is
-									// a Number
-					}
-					setRole(metrics, key, metricPath, value);
-					setMasterLinkStatus(metrics, key, metricPath, value);
-					setKeySpaceMetrics(metrics, key, metricPath, value);
-				}
-			}
+
+            String[] kv = currentLine.split(COLON_SEPARATOR);
+            if(kv.length == 2) {
+                String key = kv[0].trim();
+                String value = kv[1].trim();
+                if(value.contains(COMMA_SEPARATOR) || value.contains(EQUALS_SEPARATOR)) {
+                    List<String> keyValuePairs = Lists.newArrayList();
+                    Iterables.addAll(keyValuePairs, commaSplitter.split(value));
+                    for (String keyValue : keyValuePairs) {
+                        String [] keyAndValue = keyValue.split(EQUALS_SEPARATOR);
+                        String metricPath = getMetricPath(categoryName + METRIC_SEPARATOR + key, keyAndValue[0]);
+                        if (!isKeyExcluded(metricPath, includePatterns, excludePatterns)) {
+                            if (NumberUtils.isNumber(keyAndValue[1])) {
+                                metrics.put(metricPath, MetricUtils.toWholeNumberString(Double.parseDouble(keyAndValue[1])));
+                            }
+                        }
+                    }
+                } else {
+                    String metricPath = getMetricPath(categoryName, key);
+                    if (!isKeyExcluded(metricPath, includePatterns, excludePatterns)) {
+                        if (NumberUtils.isNumber(value)) {
+                            if("keyspace_hits".equals(key)) {
+                                keyspaceHits = new BigDecimal(value);
+                            }
+                            if("keyspace_misses".equals(key)) {
+                                keyspaceMisses = new BigDecimal(value);
+                            }
+                            metrics.put(metricPath, MetricUtils.toWholeNumberString(Double.parseDouble(value)));
+                            continue; // No need to procees further if the value is a Number
+                        }
+                        setRole(metrics, key, metricPath, value);
+                        setMasterLinkStatus(metrics, key, metricPath, value);
+                    }
+                }
+            }
 		}
-		metricsForAServer.setMetrics(metrics);
-		return metricsForAServer;
+		return metrics;
 	}
 
 	private void setMasterLinkStatus(Map<String, String> metrics, String key, String metricPath, String value) {
@@ -141,20 +184,6 @@ public class RedisMonitorTask {
 		}
 	}
 
-	private void setKeySpaceMetrics(Map<String, String> metrics, String key, String metricPath, String value) {
-		for (String keyspace : server.getKeyspaces()) {
-			if (keyspace.equals(key)) {
-				logger.debug("gathering stats for keyspace " + keyspace);
-				Splitter metricsSplitter = Splitter.on(COMMA_SEPARATOR).trimResults();
-				String keySpaceMetricPath = metricPath + METRIC_SEPARATOR;
-				for (String metric : metricsSplitter.split(value)) {
-					String[] keyValue = metric.split(EQUALS_SEPARATOR);
-					metrics.put(keySpaceMetricPath + keyValue[0].trim(), keyValue[1].trim());
-				}
-			}
-		}
-	}
-
 	private String getMetricPath(String categoryName, String metricName) {
 		StringBuilder metricPath = new StringBuilder();
 		metricPath.append(Strings.isNullOrEmpty(server.getDisplayName()) ? "" : server.getDisplayName() + METRIC_SEPARATOR);
@@ -163,16 +192,37 @@ public class RedisMonitorTask {
 		return metricPath.toString();
 	}
 
-	private boolean isKeyExcluded(String metricKey, Set<String> excludePatterns) {
-		for (String excludePattern : excludePatterns) {
-			if (metricKey.matches(escapeText(excludePattern))) {
-				return true;
-			}
-		}
+	private boolean isKeyExcluded(String metricKey, Set<String> includePatterns, Set<String> excludePatterns) {
+        if(includePatterns.isEmpty()) {
+            for (String excludePattern : excludePatterns) {
+                if (metricKey.matches(escapeText(excludePattern))) {
+                    return true;
+                }
+            }
+        } else {
+            for(String includePattern : includePatterns) {
+                if(metricKey.matches(escapeText(includePattern))) {
+                    return false;
+                } else {
+                    return true;
+                }
+            }
+        }
 		return false;
 	}
+
 
 	private String escapeText(String excludePattern) {
 		return excludePattern.replaceAll("\\|", "\\\\|");
 	}
+
+    public void closeJedisClient(Jedis client) {
+        try {
+            if (client.isConnected()) {
+                client.close();
+            }
+        } catch (Exception e) {
+           logger.error("Error while shutting the Jedis connection", e);
+        }
+    }
 }
