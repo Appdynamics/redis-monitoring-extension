@@ -16,6 +16,7 @@
 package com.appdynamics.extensions.redis;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -88,7 +89,7 @@ public class RedisMonitorTask {
 
     private String computeKeySpaceHitRatio(BigDecimal keyspaceHits, BigDecimal keyspaceMisses) {
         if(keyspaceHits.add(keyspaceMisses).compareTo(BigDecimal.ZERO) != 0) {
-            BigDecimal keySpaceHitRatio = keyspaceHits.divide(keyspaceHits.add(keyspaceMisses));
+            BigDecimal keySpaceHitRatio = keyspaceHits.divide(keyspaceHits.add(keyspaceMisses),0, RoundingMode.HALF_UP);
             return keySpaceHitRatio.toString();
         }
         return null;
