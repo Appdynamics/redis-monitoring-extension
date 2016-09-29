@@ -1,4 +1,4 @@
-# Redis Monitoring Extension
+# AppDynamics Monitoring Extension for use with Redis
 
 This extension works only with the standalone machine agent.
 
