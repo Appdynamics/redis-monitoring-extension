@@ -15,27 +15,25 @@
  */
 package com.appdynamics.extensions.redis;
 
-import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import com.google.common.collect.Iterables;
-import com.google.common.collect.Lists;
-import org.apache.log4j.Logger;
-
-import redis.clients.jedis.Jedis;
-import redis.clients.jedis.exceptions.JedisConnectionException;
-import redis.clients.jedis.exceptions.JedisDataException;
-
 import com.appdynamics.extensions.NumberUtils;
 import com.appdynamics.extensions.redis.config.RedisMetrics;
 import com.appdynamics.extensions.redis.config.Server;
 import com.appdynamics.extensions.util.MetricUtils;
 import com.google.common.base.Splitter;
 import com.google.common.base.Strings;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import org.apache.log4j.Logger;
+import redis.clients.jedis.Jedis;
+import redis.clients.jedis.exceptions.JedisConnectionException;
+import redis.clients.jedis.exceptions.JedisDataException;
+
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public class RedisMonitorTask {
 	private static final String COMMA_SEPARATOR = ",";
@@ -117,7 +115,7 @@ public class RedisMonitorTask {
 	private Map<String, String> parseOutputString(String info) {
 		Map<String, String> metrics = Maps.newHashMap();
 		String categoryName = "";
-		Set<String> excludePatterns = server.getExcludePatterns();
+        Set<String> excludePatterns = server.getExcludePatterns();
         Set<String> includePatterns = server.getIncludePatterns();
 		Splitter lineSplitter = Splitter.on(System.getProperty("line.separator")).omitEmptyStrings().trimResults();
         Splitter commaSplitter = Splitter.on(COMMA_SEPARATOR).omitEmptyStrings().trimResults();
@@ -137,7 +135,7 @@ public class RedisMonitorTask {
                     for (String keyValue : keyValuePairs) {
                         String [] keyAndValue = keyValue.split(EQUALS_SEPARATOR);
                         String metricPath = getMetricPath(categoryName + METRIC_SEPARATOR + key, keyAndValue[0]);
-                        if (!isKeyExcluded(metricPath, includePatterns, excludePatterns)) {
+                        if (isMetricToBeReported(metricPath, includePatterns, excludePatterns)) {
                             if (NumberUtils.isNumber(keyAndValue[1])) {
                                 metrics.put(metricPath, MetricUtils.toWholeNumberString(Double.parseDouble(keyAndValue[1])));
                             }
@@ -145,7 +143,7 @@ public class RedisMonitorTask {
                     }
                 } else {
                     String metricPath = getMetricPath(categoryName, key);
-                    if (!isKeyExcluded(metricPath, includePatterns, excludePatterns)) {
+                    if (isMetricToBeReported(metricPath, includePatterns, excludePatterns)) {
                         if (NumberUtils.isNumber(value)) {
                             if("keyspace_hits".equals(key)) {
                                 keyspaceHits = new BigDecimal(value);
@@ -193,23 +191,24 @@ public class RedisMonitorTask {
 		return metricPath.toString();
 	}
 
-	private boolean isKeyExcluded(String metricKey, Set<String> includePatterns, Set<String> excludePatterns) {
-        if(includePatterns.isEmpty()) {
-            for (String excludePattern : excludePatterns) {
-                if (metricKey.matches(escapeText(excludePattern))) {
-                    return true;
+	public boolean isMetricToBeReported(String metricKey, Set<String> includePatterns, Set<String> excludePatterns) {
+        if(includePatterns != null && excludePatterns != null) {
+            if(!includePatterns.isEmpty()) {
+                for(String includePattern : includePatterns) {
+                    if(metricKey.matches(escapeText(includePattern))) {
+                        return true;
+                    }
                 }
-            }
-        } else {
-            for(String includePattern : includePatterns) {
-                if(metricKey.matches(escapeText(includePattern))) {
-                    return false;
-                } else {
-                    return true;
+                return false;
+            } else if (!excludePatterns.isEmpty()) {
+                for (String excludePattern : excludePatterns) {
+                    if (metricKey.matches(escapeText(excludePattern))) {
+                        return false;
+                    }
                 }
             }
         }
-		return false;
+        return true;
 	}
 
 
