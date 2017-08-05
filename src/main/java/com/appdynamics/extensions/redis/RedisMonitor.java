@@ -1,12 +1,12 @@
 /**
- * Copyright 2014 AppDynamics, Inc.
- * 
+ * Copyright 2017 AppDynamics, Inc.
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  * http://www.apache.org/licenses/LICENSE-2.0
- * 
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -15,119 +15,55 @@
  */
 package com.appdynamics.extensions.redis;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.util.List;
-import java.util.Map;
-
-import com.appdynamics.extensions.yml.YmlReader;
-import org.apache.log4j.Logger;
-
-import com.appdynamics.extensions.PathResolver;
-import com.appdynamics.extensions.redis.config.ConfigUtil;
-import com.appdynamics.extensions.redis.config.Configuration;
-import com.appdynamics.extensions.redis.config.RedisMetrics;
-import com.appdynamics.extensions.redis.config.Server;
-import com.google.common.base.Strings;
-import com.google.common.collect.Lists;
+import com.appdynamics.extensions.conf.MonitorConfiguration;
+import com.appdynamics.extensions.util.MetricWriteHelper;
+import com.appdynamics.extensions.util.MetricWriteHelperFactory;
 import com.singularity.ee.agent.systemagent.api.AManagedMonitor;
-import com.singularity.ee.agent.systemagent.api.MetricWriter;
 import com.singularity.ee.agent.systemagent.api.TaskExecutionContext;
 import com.singularity.ee.agent.systemagent.api.TaskOutput;
 import com.singularity.ee.agent.systemagent.api.exception.TaskExecutionException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import java.util.List;
+import java.util.Map;
+import static com.appdynamics.extensions.redis.utils.Constants.DEFAULT_METRIC_PREFIX;
+
 
 public class RedisMonitor extends AManagedMonitor {
+    private static final Logger logger = LoggerFactory.getLogger(RedisMonitor.class);
+    public MonitorConfiguration configuration;
 
-	public static final String CONFIG_ARG = "config-file";
-	private static final Logger logger = Logger.getLogger(RedisMonitor.class);
+    public RedisMonitor(){
+        logger.info("Using Redis Monitor Version [" + getImplementationVersion() + "]");
+    }
 
-	public RedisMonitor() {
-        System.out.println(logVersion());
-	}
+    public TaskOutput execute(Map<String, String> var1, TaskExecutionContext var2) throws TaskExecutionException{
+        logger.debug("The raw arguments are {}" + var1);
+        initialize(var1);
+        configuration.executeTask();
+        return new TaskOutput("Redis monitor run completed successfully.");
+    }
 
-	public TaskOutput execute(Map<String, String> taskArguments, TaskExecutionContext taskExecutionContext) throws TaskExecutionException {
-		if (taskArguments != null) {
-            logger.info(logVersion());
-			try {
-                String configFilename = getConfigFilename(taskArguments.get(CONFIG_ARG));
-				Configuration config = YmlReader.readFromFile(configFilename, Configuration.class);
-				List<RedisMetrics> metrics = collectMetrics(config);
-				printStats(config, metrics);
-				logger.info("Redis Monitoring Task completed");
-				return new TaskOutput("Redis Monitoring Task completed");
-			} catch (Exception e) {
-				logger.error("Metrics collection failed", e);
-			}
-		}
-		throw new TaskExecutionException("Redis monitoring task completed with failures.");
-	}
+    protected void initialize(Map<String, String> var1) {
+        if(configuration == null){
+            MetricWriteHelper metricWriteHelper = MetricWriteHelperFactory.create(this);
+            MonitorConfiguration conf = new MonitorConfiguration(DEFAULT_METRIC_PREFIX, new TaskRunner(), metricWriteHelper);
+            conf.setConfigYml(var1.get("config-file"));
+            this.configuration = conf;
+        }
+    }
 
-	private List<RedisMetrics> collectMetrics(Configuration config) {
-		List<RedisMetrics> metrics = Lists.newArrayList();
-		if (config != null && config.getServers() != null) {
-			for (Server server : config.getServers()) {
-				RedisMonitorTask monitorTask = new RedisMonitorTask(server);
-				metrics.add(monitorTask.gatherMetricsForAServer());
-			}
-		}
-		return metrics;
-	}
+    private class TaskRunner implements Runnable {
+        public void run(){
+            List<Map<String,String>> servers = (List<Map<String, String>>) configuration.getConfigYml().get("servers");
+            for(Map<String, String> server : servers) {
+                RedisMonitorTask task = new RedisMonitorTask(configuration, server);
+                configuration.getExecutorService().execute(task);
+            }
+        }
+    }
 
-	private void printStats(Configuration config, List<RedisMetrics> metrics) {
-		for (RedisMetrics redisMetrics : metrics) {
-			StringBuilder metricPath = new StringBuilder();
-			metricPath.append(config.getMetricPrefix());
-			Map<String, String> metricsForAServer = redisMetrics.getMetrics();
-			for (Map.Entry<String, String> entry : metricsForAServer.entrySet()) {
-				printAverageAverageIndividual(metricPath.toString() + entry.getKey(), entry.getValue());
-			}
-		}
-	}
-
-	private void printAverageAverageIndividual(String metricPath, String metricValue) {
-		printMetric(metricPath, metricValue, MetricWriter.METRIC_AGGREGATION_TYPE_OBSERVATION, MetricWriter.METRIC_TIME_ROLLUP_TYPE_AVERAGE,
-				MetricWriter.METRIC_CLUSTER_ROLLUP_TYPE_INDIVIDUAL);
-	}
-
-	private void printMetric(String metricPath, String metricValue, String aggregation, String timeRollup, String cluster) {
-		MetricWriter metricWriter = super.getMetricWriter(metricPath, aggregation, timeRollup, cluster);
-		if (metricValue != null) {
-			if(logger.isDebugEnabled()) {
-				logger.debug(metricPath + "   " + metricValue);
-			}
-            metricWriter.printMetric(metricValue);
-		}
-	}
-
-	/**
-	 * Returns a config file name,
-	 * 
-	 * @param filename
-	 * @return String
-	 */
-	private String getConfigFilename(String filename) {
-		if (filename == null) {
-			return "";
-		}
-		// for absolute paths
-		if (new File(filename).exists()) {
-			return filename;
-		}
-		// for relative paths
-		File jarPath = PathResolver.resolveDirectory(AManagedMonitor.class);
-		String configFileName = "";
-		if (!Strings.isNullOrEmpty(filename)) {
-			configFileName = jarPath + File.separator + filename;
-		}
-		return configFileName;
-	}
-
-	private static String getImplementationVersion() {
-		return RedisMonitor.class.getPackage().getImplementationTitle();
-	}
-
-    private String logVersion() {
-        String msg = "Using Monitor Version [" + getImplementationVersion() + "]";
-        return msg;
+    private static String getImplementationVersion() {
+        return RedisMonitor.class.getPackage().getImplementationVersion();
     }
 }
