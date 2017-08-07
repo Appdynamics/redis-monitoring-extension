@@ -10,7 +10,7 @@ Redis is an in memory key-value data store. The Redis monitoring extension gathe
 2. Unzip as "RedisMonitor" and copy the "RedisMonitor" directory to `<MACHINE_AGENT_HOME>/monitors`
 
 ## Configuration ##
-Note : Please make sure to not use tab (\t) while editing yaml files. You may want to validate the yaml file using a [yaml validator](http://yamllint.com/)
+Note : Please make sure to not use tab (\t) while editing yaml files. You may want to validate the yaml file using a [yaml validator](http://yamllint.com/).
 
 1. Configure the Redis instances by editing the config.yml file in `<MACHINE_AGENT_HOME>/monitors/RedisMonitor/`. Specify the host, port of the Redis instance, password if authentication enabled and keyspaces.
    You can also add excludePatterns (regex) to exclude metrics from showing up in the AppDynamics controller.
