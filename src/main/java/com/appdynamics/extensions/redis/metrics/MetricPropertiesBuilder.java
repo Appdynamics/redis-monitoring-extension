@@ -4,11 +4,10 @@ import java.util.Map;
 
 public class MetricPropertiesBuilder {
 
-    Map<String, String> metricOptions;
-    String infoValue;
-    MetricProperties metricProperties;
-    String sectionName;
-    String actualMetricName;
+    private Map<String, String> metricOptions;
+    private String infoValue;
+    private String sectionName;
+    private String actualMetricName;
 
     public MetricPropertiesBuilder(Map<String, String> metricOptions, String infoValue, String sectionName, String actualMetricName){
         this.metricOptions = metricOptions;
@@ -18,19 +17,16 @@ public class MetricPropertiesBuilder {
     }
 
     public MetricProperties buildMetricProperties(){
-        metricProperties = new MetricProperties();
+        MetricProperties metricProperties = new MetricProperties();
         metricProperties.setSectionName(sectionName);
-        metricProperties.setValue(infoValue);
+        metricProperties.setInfoValue(infoValue);
         metricProperties.setAlias(metricOptions.get("alias"), actualMetricName);
         metricProperties.setMultiplier(metricOptions.get("multiplier"));
         metricProperties.setAggregation(metricOptions.get("aggregation"));
         metricProperties.setTime(metricOptions.get("time"));
         metricProperties.setCluster(metricOptions.get("cluster"));
         metricProperties.setDelta(metricOptions.get("delta"));
-        metricProperties.setIsCluster(metricOptions.get("isCluster"));
+        metricProperties.setAggregateAtCluster(metricOptions.get("aggregateAtCluster"));
         return metricProperties;
     }
-
-
-
 }

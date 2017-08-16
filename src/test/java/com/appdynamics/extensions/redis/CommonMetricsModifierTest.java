@@ -28,7 +28,8 @@ public class CommonMetricsModifierTest {
         individualSectionInfoMap = infoMapExtractor.extractInfoAsHashMap(info, "Clients");
         Map<String, ?> config = YmlReader.readFromFile(new File("src/test/resources/conf/config.yml"));
         Map<String,?> metrics = (Map<String, ?>)config.get("metrics");
-        List<Map<String, ?>> client = (List<Map<String, ?>>)metrics.get("Clients");
+        Map<String, ?> infoMap = (Map<String, ?>)metrics.get("Info");
+        List<Map<String, ?>> client = (List<Map<String, ?>>)infoMap.get("Clients");
         individualSectionFields = client;
         commonMetricsModifier = new CommonMetricsModifier(individualSectionFields, individualSectionInfoMap, "Clients");
 
@@ -38,9 +39,10 @@ public class CommonMetricsModifierTest {
     public void clientMapWithMetricPropertiesTest(){
         finalClientMap = commonMetricsModifier.metricBuilder();
         Assert.assertTrue(finalClientMap.get("connected_clients").getAlias().equalsIgnoreCase("connected_clients"));
-        Assert.assertTrue(finalClientMap.get("connected_clients").getMultiplier().trim().length() == 0);
-        Assert.assertTrue(finalClientMap.get("connected_clients").getIsCluster() == true);
+        Assert.assertTrue(finalClientMap.get("connected_clients").getMultiplier().compareTo(new BigDecimal("2")) == 0);
+        Assert.assertTrue(finalClientMap.get("connected_clients").getAggregateAtCluster());
         Assert.assertTrue(finalClientMap.get("connected_clients").getInfoValue().equals(new BigDecimal("1")));
+        Assert.assertTrue(finalClientMap.get("blocked_clients").getInfoValue() == null);
     }
 
 

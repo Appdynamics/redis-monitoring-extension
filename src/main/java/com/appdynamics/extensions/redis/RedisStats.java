@@ -16,53 +16,83 @@
 package com.appdynamics.extensions.redis;
 
 import com.appdynamics.extensions.conf.MonitorConfiguration;
+import com.appdynamics.extensions.crypto.CryptoUtil;
+import com.google.common.base.Strings;
+import com.google.common.collect.Maps;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
-import redis.clients.jedis.exceptions.JedisConnectionException;
+
 import java.util.Map;
 
 public class RedisStats {
-    public MonitorConfiguration configuration;
+    private MonitorConfiguration configuration;
     public Map<String, String> server;
     private Logger logger = LoggerFactory.getLogger(RedisStats.class);
-    public JedisPool jedisPool;
+    private JedisPool jedisPool;
 
     RedisStats(MonitorConfiguration configuration, Map<String, String> server) {
         this.configuration = configuration;
         this.server = server;
     }
 
-    public void gatherMetrics() {
+    protected void gatherMetrics() {
         String host = server.get("host");
         int port = Integer.parseInt(server.get("port"));
-        String password = server.get("password");
+        String password = getPassword(server);
         JedisPoolConfig jedisPoolConfig = buildJedisPoolConfig();
         if(password.trim().length() != 0){
-            jedisPool = new JedisPool(jedisPoolConfig, host, port, 2000, password);
+            try {
+                jedisPool = new JedisPool(jedisPoolConfig, host, port, 2000, password);
+            }
+            catch(Exception e){
+                logger.info("Exception while creating JedisPool" + e);
+            }
         }
         else{
-            jedisPool = new JedisPool(jedisPoolConfig, host, port);
+            try {
+                jedisPool = new JedisPool(jedisPoolConfig, host, port);
+            }
+            catch(Exception e){
+                logger.info("Exception while creating JedisPool" + e);
+            }
         }
         getMetricsFromInfo(jedisPool);
 
     }
 
-    public JedisPoolConfig buildJedisPoolConfig(){
+    public String getPassword(Map<String, String> server){
+        String password = server.get("password");
+        String encryptedPassword = server.get("encryptedPassword");
+        Map<String, ?> configMap = configuration.getConfigYml();
+
+        String encryptionKey =    configMap.get("encryptionKey").toString();
+        if(!Strings.isNullOrEmpty(password)){
+            return password;
+        }
+        if(!Strings.isNullOrEmpty(encryptedPassword) && !Strings.isNullOrEmpty(encryptionKey)){
+            Map<String,String> cryptoMap = Maps.newHashMap();
+            cryptoMap.put("password-encrypted", encryptedPassword);
+            cryptoMap.put("encryption-key", encryptionKey);
+            logger.debug("Decrypting the ecncrypted password........");
+            return CryptoUtil.getPassword(cryptoMap);
+        }
+        return "";
+
+    }
+
+    private JedisPoolConfig buildJedisPoolConfig(){
         JedisPoolConfig jedisPoolConfig = new JedisPoolConfig();
         jedisPoolConfig.setMaxTotal(3);
         return jedisPoolConfig;
 
     }
 
-    void getMetricsFromInfo(JedisPool jedisPool) {
-        //slowlog_slower_than = Integer.parseInt(server.get("slowlog-slower-than"));
+    private void getMetricsFromInfo(JedisPool jedisPool) {
         Map<String, ?> metricsMap = (Map<String, ?>) configuration.getConfigYml().get("metrics");
-        RedisThreadsHandler redisThreadsHandler = new RedisThreadsHandler(metricsMap, jedisPool, configuration, server);
-        redisThreadsHandler.parseMap();
-        /*metrics.putAll(redisThreadsHandler.metrics);
-        return metrics;*/
+        RedisCommandHandler redisCommandHandler = new RedisCommandHandler(metricsMap, jedisPool, configuration, server);
+        //configuration.getMetricWriter().on
+        redisCommandHandler.parseMap();
     }
 }

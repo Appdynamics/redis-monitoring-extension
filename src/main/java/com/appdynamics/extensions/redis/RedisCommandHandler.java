@@ -20,35 +20,44 @@ import com.appdynamics.extensions.redis.metrics.RedisMetrics;
 import com.appdynamics.extensions.redis.metrics.SlowLogMetrics;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 
 import java.util.Map;
+import java.util.concurrent.CountDownLatch;
 
-public class RedisThreadsHandler {
-    public Map<String, ?> metricsMap;
-    //public int slowlog_log_slower_than;
-    public MonitorConfiguration configuration;
+public class RedisCommandHandler {
+    private Map<String, ?> metricsMap;
+    private MonitorConfiguration configuration;
     public Map<String, String> server;
-    public JedisPool jedisPool;
-    private Logger logger = LoggerFactory.getLogger(RedisThreadsHandler.class);
+    private JedisPool jedisPool;
+    private Logger logger = LoggerFactory.getLogger(RedisCommandHandler.class);
+    private CountDownLatch countDownLatch = new CountDownLatch(2);
 
-    public RedisThreadsHandler(Map<String, ?> metricsMap, JedisPool jedisPool, MonitorConfiguration configuration, Map<String, String> server) {
+
+    protected RedisCommandHandler(Map<String, ?> metricsMap, JedisPool jedisPool, MonitorConfiguration configuration, Map<String, String> server) {
         this.metricsMap = metricsMap;
-        //this.slowlog_log_slower_than = slowlog_log_slower_than;
         this.jedisPool = jedisPool;
         this.configuration = configuration;
         this.server = server;
 
     }
 
-    public void parseMap() {
-        SlowLogMetrics slowLogMetricsTask = new SlowLogMetrics(jedisPool, metricsMap, configuration, server);
+    protected void parseMap() {
+
+        SlowLogMetrics slowLogMetricsTask = new SlowLogMetrics(jedisPool, metricsMap, configuration, server, countDownLatch);
         configuration.getExecutorService().execute(slowLogMetricsTask);
-        RedisMetrics redisMetricsTask = new RedisMetrics(jedisPool, metricsMap, configuration, server);
+        Map<String, ? > infoMetricsConfigMap = (Map<String, ?>)metricsMap.get("Info");
+        RedisMetrics redisMetricsTask = new RedisMetrics(jedisPool, infoMetricsConfigMap, configuration, server, countDownLatch);
         configuration.getExecutorService().execute(redisMetricsTask);
-        //logger.info("========================================Pool closed!!!!!!!!!!!!!!!==========================================");
-        //jedisPool.close();
+        try{
+            countDownLatch.await();
+        }
+        catch(InterruptedException e){
+            e.printStackTrace();
+        }
+        finally {
+            jedisPool.destroy();
+        }
 
     }
 }

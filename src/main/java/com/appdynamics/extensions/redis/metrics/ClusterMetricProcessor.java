@@ -3,44 +3,43 @@ package com.appdynamics.extensions.redis.metrics;
 import com.appdynamics.extensions.redis.utils.ValidityChecker;
 import com.appdynamics.extensions.util.AggregatorFactory;
 import com.appdynamics.extensions.util.AggregatorKey;
+import com.google.common.base.Strings;
 import com.singularity.ee.agent.systemagent.api.MetricWriter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import java.math.BigDecimal;
 import java.util.Map;
-
 import static com.appdynamics.extensions.redis.utils.Constants.*;
 
 public class ClusterMetricProcessor {
     private static final Logger logger = LoggerFactory.getLogger(RedisMetrics.class);
 
-    public void collect(AggregatorFactory aggregatorFactory, Map<String, MetricProperties> metrics){
+    protected void collect(AggregatorFactory aggregatorFactory, Map<String, MetricProperties> metrics){
        if(metrics == null){
            return;
        }
        for(Map.Entry<String, MetricProperties> metric : metrics.entrySet()){
            String metricName = metric.getKey();
            MetricProperties currentMetricProperties = metric.getValue();
-           if(currentMetricProperties.getIsCluster()){
+           if(currentMetricProperties.getAggregateAtCluster()){
                String metricType = getMetricType(currentMetricProperties);
-               AggregatorKey aggregatorKey = new AggregatorKey(currentMetricProperties.getSectionName() + METRIC_SEPARATOR + currentMetricProperties.getAlias(), metricType );
+               String alias = currentMetricProperties.getAlias();
+               AggregatorKey aggregatorKey = new AggregatorKey(currentMetricProperties.getSectionName() + METRIC_SEPARATOR + (Strings.isNullOrEmpty(alias) ? metricName : alias), metricType );
                aggregatorFactory.getAggregator(metricType).add(aggregatorKey, currentMetricProperties.getModifiedFinalValue().toString());
            }
 
        }
     }
 
-    public void collect(AggregatorFactory aggregatorFactory, String slowLogMetricName, int metricValue, Map<String, String> slowLogMetricProperties){
+    protected void collect(AggregatorFactory aggregatorFactory, String slowLogMetricName, BigDecimal metricValue, Map<String, String> slowLogMetricProperties){
         if(slowLogMetricProperties == null){
             return;
         }
-        if(slowLogMetricProperties.get("isCluster") != null && slowLogMetricProperties.get("isCluster").equalsIgnoreCase("true")){
+        if(slowLogMetricProperties.get("aggregateAtCluster") != null && slowLogMetricProperties.get("aggregateAtCluster").equalsIgnoreCase("true")){
             String metricType = getSlowLogMetricType(slowLogMetricProperties);
             String alias = slowLogMetricProperties.get("alias");
-            AggregatorKey aggregatorKey = new AggregatorKey("Slowlog" + METRIC_SEPARATOR + ((alias == null) || (alias.trim().length() == 0) ? slowLogMetricName : alias), metricType) ;
-            BigDecimal metricValueBigD = new BigDecimal(metricValue);
-            aggregatorFactory.getAggregator(metricType).add(aggregatorKey, metricValueBigD.toString());
+            AggregatorKey aggregatorKey = new AggregatorKey("SlowLog" + METRIC_SEPARATOR + (Strings.isNullOrEmpty(alias) ? slowLogMetricName : alias), metricType) ;
+            aggregatorFactory.getAggregator(metricType).add(aggregatorKey, metricValue.toString());
         }
 
 

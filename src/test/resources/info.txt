@@ -22,7 +22,7 @@ config_file:
 connected_clients:1
 client_longest_output_list:0
 client_biggest_input_buf:0
-blocked_clients:0
+blocked_clients:
 
 # Memory
 used_memory:1031856

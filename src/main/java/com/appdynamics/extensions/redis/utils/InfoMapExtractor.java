@@ -23,7 +23,7 @@ public class InfoMapExtractor {
         return infoMap;
     }
 
-    Map<String, String> sectionMapGenerator(String sectionData, String sectionName) {
+    private Map<String, String> sectionMapGenerator(String sectionData, String sectionName) {
         Map<String, String> infoMap = Maps.newHashMap();
         Splitter lineSplitter = Splitter.on(System.getProperty("line.separator"))
                                         .omitEmptyStrings()

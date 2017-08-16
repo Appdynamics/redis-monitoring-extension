@@ -29,9 +29,10 @@ import java.util.Map;
 import static com.appdynamics.extensions.redis.utils.Constants.DEFAULT_METRIC_PREFIX;
 
 
-public class RedisMonitor extends AManagedMonitor {
+public class  RedisMonitor extends AManagedMonitor {
     private static final Logger logger = LoggerFactory.getLogger(RedisMonitor.class);
-    public MonitorConfiguration configuration;
+    private MonitorConfiguration configuration;
+    private long previousTimestamp;
 
     public RedisMonitor(){
         logger.info("Using Redis Monitor Version [" + getImplementationVersion() + "]");
@@ -40,11 +41,13 @@ public class RedisMonitor extends AManagedMonitor {
     public TaskOutput execute(Map<String, String> var1, TaskExecutionContext var2) throws TaskExecutionException{
         logger.debug("The raw arguments are {}" + var1);
         initialize(var1);
+        previousTimestamp = System.currentTimeMillis();
         configuration.executeTask();
+        configuration.getMetricWriter().
         return new TaskOutput("Redis monitor run completed successfully.");
     }
 
-    protected void initialize(Map<String, String> var1) {
+    private void initialize(Map<String, String> var1) {
         if(configuration == null){
             MetricWriteHelper metricWriteHelper = MetricWriteHelperFactory.create(this);
             MonitorConfiguration conf = new MonitorConfiguration(DEFAULT_METRIC_PREFIX, new TaskRunner(), metricWriteHelper);

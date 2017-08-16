@@ -4,19 +4,19 @@ import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import java.util.concurrent.TimeUnit;
 
-public class SlowLogTimeCache {
+ class SlowLogTimeCache {
     private final Cache<String, Long> slowlogTimeCache;
 
-    public SlowLogTimeCache(int durationInSeconds){
+    protected SlowLogTimeCache(int durationInSeconds){
         this.slowlogTimeCache = CacheBuilder.newBuilder().expireAfterWrite((long)durationInSeconds, TimeUnit.MINUTES).build();
     }
 
-    public void setMostRecentTimeStamp(String mostRecentTimeStamp, long timeStampValue){
+    protected void setMostRecentTimeStamp(String mostRecentTimeStamp, long timeStampValue){
         slowlogTimeCache.put(mostRecentTimeStamp, timeStampValue);
 
     }
 
-    public Long getMostRecentTimeStamp(){
+    protected Long getMostRecentTimeStamp(){
         return slowlogTimeCache.getIfPresent("mostRecentTimeStamp");
     }
 }

@@ -11,10 +11,9 @@ import java.util.List;
 import java.util.Map;
 
 public class CommonMetricsModifier {
-    Map<String, MetricProperties> individualSectionMetrics;
-    List<Map<String, ?>> individualSectionFields;
-    Map<String, String> individualSectionInfoMap;
-    String sectionName;
+    private List<Map<String, ?>> individualSectionFields;
+    private Map<String, String> individualSectionInfoMap;
+    private String sectionName;
     private static final Logger logger = LoggerFactory.getLogger(CommonMetricsModifier.class);
 
     public CommonMetricsModifier(List<Map<String, ?>> individualSectionFields, Map<String, String> individualSectionInfoMap, String sectionName){
@@ -24,14 +23,16 @@ public class CommonMetricsModifier {
     }
 
     public Map<String, MetricProperties> metricBuilder(){
-        individualSectionMetrics = Maps.newHashMap();
+        Map<String, MetricProperties> individualSectionMetrics = Maps.newHashMap();
         for(Map<String, ?> individualMetricMap : individualSectionFields){ //Iterates through the list of metrics for the specific section("sectionName") and adds each metric in the individualSectionMetrics Map.
-            String actualMetricName = individualMetricMap.entrySet().iterator().next().getKey();
-            Map<String, String> metricModifierMap = (Map<String, String>)individualMetricMap.get(actualMetricName);
-            String actualIndividualMetricValue =  individualSectionInfoMap.get(actualMetricName);
-            MetricPropertiesBuilder metricPropertiesBuilder = new MetricPropertiesBuilder(metricModifierMap, actualIndividualMetricValue, sectionName, actualMetricName);
-            MetricProperties metricProperties = metricPropertiesBuilder.buildMetricProperties();
-            individualSectionMetrics.put(actualMetricName, metricProperties );
+            if(individualMetricMap != null) {
+                String actualMetricName = individualMetricMap.entrySet().iterator().next().getKey();
+                Map<String, String> metricModifierMap = (Map<String, String>) individualMetricMap.get(actualMetricName);
+                String actualIndividualMetricValue = individualSectionInfoMap.get(actualMetricName);
+                MetricPropertiesBuilder metricPropertiesBuilder = new MetricPropertiesBuilder(metricModifierMap, actualIndividualMetricValue, sectionName, actualMetricName);
+                MetricProperties metricProperties = metricPropertiesBuilder.buildMetricProperties();
+                individualSectionMetrics.put(actualMetricName, metricProperties);
+            }
         }
         return individualSectionMetrics;
     }

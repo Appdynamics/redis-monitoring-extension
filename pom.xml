@@ -55,6 +55,12 @@
             <artifactId>jedis</artifactId>
             <version>2.9.0</version>
         </dependency>
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpclient</artifactId>
+            <version>4.3.5</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>
@@ -108,7 +114,7 @@
                                     <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
                                         <manifestEntries>
                                             <Main-Class>com.appdynamics.extensions.workbench.WorkbenchServerLauncher</Main-Class>
-                                            <Implementation-Title>Coherence Monitor v${project.version} Build Date ${maven.build.timestamp}</Implementation-Title>
+                                            <Implementation-Title>Redis Monitor v${project.version} Build Date ${maven.build.timestamp}</Implementation-Title>
                                         </manifestEntries>
                                     </transformer>
                                 </transformers>
@@ -135,7 +141,7 @@
                                         <fileset dir="${build.directory}" includes="${project.artifactId}.${project.packaging}"/>
                                     </copy>
                                     <zip destfile="${target.dir}-${project.version}.zip">
-                                        <zipfileset dir="${target.dir}" filemode="755" prefix="CoherenceMonitor/"/>
+                                        <zipfileset dir="${target.dir}" filemode="755" prefix="RedisMonitor/"/>
                                     </zip>
                                     <delete dir="${target.dir}"/>
                                 </target>

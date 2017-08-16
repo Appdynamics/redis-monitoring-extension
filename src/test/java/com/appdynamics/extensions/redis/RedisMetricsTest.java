@@ -48,16 +48,16 @@ public class RedisMetricsTest {
         individualSectionInfoMap = infoMapExtractor.extractInfoAsHashMap(info, "Clients");
         Map<String, ?> config = YmlReader.readFromFile(new File("src/test/resources/conf/config.yml"));
         Map<String,?> metrics = (Map<String, ?>)config.get("metrics");
-
-        List<Map<String, ?>> client = (List<Map<String, ?>>)metrics.get("Clients");
+        Map<String, ?> infoMap = (Map<String, ?>)metrics.get("Info");
+        List<Map<String, ?>> client = (List<Map<String, ?>>)infoMap.get("Clients");
         individualSectionFields = client;
         commonMetricsModifier = new CommonMetricsModifier(individualSectionFields, individualSectionInfoMap, "Clients");
         finalClientMap = commonMetricsModifier.metricBuilder();
-
+      //  MonitorConfiguration configuration = new MonitorConfiguration("",null,null);
         when(configuration.getMetricWriter()).thenReturn(metricWriteHelper);
         when(configuration.getMetricPrefix()).thenReturn("Server|Component:AppLevels|Custom Metrics|Redis");
-        when(server.get("name")).thenReturn("server1");
-        when(server.get("isCluster")).thenReturn("true");
+        //when(server.get("name")).thenReturn("server1");
+        //when(server.get("isCluster")).thenReturn("true");
         when(jedisPool.getResource()).thenReturn(jedis);
         when(jedis.info()).thenReturn(info);
 
@@ -65,10 +65,10 @@ public class RedisMetricsTest {
         //redisMetrics = new RedisMetrics(jedisPool, metrics, configuration, server);
     }
 
-    /*@Test
+    @Test
     public void jedisInfoTest(){
         //Assert.assertTrue(redisMetrics.extractInfo().equalsIgnoreCase(info));
-    }*/
+    }
 
 
     /*@Test

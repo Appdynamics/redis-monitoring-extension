@@ -1,24 +1,23 @@
 package com.appdynamics.extensions.redis.metrics;
 
+import com.appdynamics.extensions.NumberUtils;
 import com.appdynamics.extensions.redis.utils.ValidityChecker;
-
+import com.google.common.base.Strings;
 import java.math.BigDecimal;
 
-import static com.appdynamics.extensions.redis.utils.Constants.AGGREGATION_DEFAULT;
-import static com.appdynamics.extensions.redis.utils.Constants.CLUSTER_ROLLUP_DEFAULT;
-import static com.appdynamics.extensions.redis.utils.Constants.TIME_ROLLUP_DEFAULT;
+import static com.appdynamics.extensions.redis.utils.Constants.*;
 
 public class MetricProperties {
     String sectionName;
     BigDecimal value;
     BigDecimal modifiedFinalValue;
     String alias;
-    String multiplier;
+    BigDecimal multiplier;
     String aggregation;
     String time;
     String cluster;
     String delta;
-    boolean isCluster;
+    boolean aggragateAtCluster;
     ValidityChecker validityChecker = new ValidityChecker();
 
 
@@ -34,9 +33,9 @@ public class MetricProperties {
         return value;
     }
 
-    public void setValue(String value){
-        if(value == null || value.equals("")){
-            this.value = new BigDecimal(0);
+    public void setInfoValue(String value){
+        if(Strings.isNullOrEmpty(value)){
+            this.value = null;
         }
         else{
             this.value = new BigDecimal(value);
@@ -65,12 +64,13 @@ public class MetricProperties {
         }
     }
 
-    public String getMultiplier(){
+    public BigDecimal getMultiplier(){
         return multiplier;
     }
 
     public void setMultiplier(String multiplier){
-        this.multiplier = multiplier;
+            BigDecimal multiplierBigD = NumberUtils.isNumber(multiplier) ? new BigDecimal(multiplier.trim()) : DEFAULT_MULTIPLIER;
+            this.multiplier = multiplierBigD;
     }
 
     public String getAggregation(){
@@ -117,24 +117,24 @@ public class MetricProperties {
     }
 
     public void setDelta(String delta){
-        if(delta == null){
+        if(Strings.isNullOrEmpty(delta) || !delta.equalsIgnoreCase("true")){
             this.delta = "false";
         }
         else{
-            this.delta = delta;
+            this.delta = "true";
         }
     }
 
-    public void setIsCluster(String isCluster){
-        if(isCluster == null || !isCluster.equalsIgnoreCase("true")){
-            this.isCluster = false;
+    public void setAggregateAtCluster(String aggregateAtCluster){
+        if(Strings.isNullOrEmpty(aggregateAtCluster) || !aggregateAtCluster.equalsIgnoreCase("true")){
+            this.aggragateAtCluster = false;
         }
         else{
-            this.isCluster = Boolean.parseBoolean(isCluster);
+            this.aggragateAtCluster = true;
         }
     }
 
-    public boolean getIsCluster(){
-        return isCluster;
+    public boolean getAggregateAtCluster(){
+        return this.aggragateAtCluster;
     }
 }

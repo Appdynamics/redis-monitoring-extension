@@ -22,10 +22,10 @@ import java.util.Map;
 
 public class RedisMonitorTask implements Runnable {
     private static final Logger logger = LoggerFactory.getLogger(RedisMonitorTask.class);
-    MonitorConfiguration configuration;
+    private MonitorConfiguration configuration;
     private Map<String, String> server;
 
-    public RedisMonitorTask(MonitorConfiguration configuration, Map<String, String> server) {
+    protected RedisMonitorTask(MonitorConfiguration configuration, Map<String, String> server) {
         this.configuration = configuration;
         this.server = server;
     }
@@ -34,7 +34,7 @@ public class RedisMonitorTask implements Runnable {
         populateAndPrintMetrics();
     }
 
-    public void populateAndPrintMetrics() {
+    private void populateAndPrintMetrics() {
 
         RedisStats redisStatistics = new RedisStats(configuration, server);
         redisStatistics.gatherMetrics();
