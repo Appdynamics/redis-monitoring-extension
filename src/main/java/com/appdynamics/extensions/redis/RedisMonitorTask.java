@@ -24,10 +24,14 @@ public class RedisMonitorTask implements Runnable {
     private static final Logger logger = LoggerFactory.getLogger(RedisMonitorTask.class);
     private MonitorConfiguration configuration;
     private Map<String, String> server;
+    private long previousTimeStamp;
+    private long currentTimeStamp;
 
-    protected RedisMonitorTask(MonitorConfiguration configuration, Map<String, String> server) {
+    protected RedisMonitorTask(MonitorConfiguration configuration, Map<String, String> server, long previousTimeStamp, long currentTimeStamp) {
         this.configuration = configuration;
         this.server = server;
+        this.previousTimeStamp = previousTimeStamp;
+        this.currentTimeStamp = currentTimeStamp;
     }
 
     public void run() {
@@ -36,7 +40,7 @@ public class RedisMonitorTask implements Runnable {
 
     private void populateAndPrintMetrics() {
 
-        RedisStats redisStatistics = new RedisStats(configuration, server);
+        RedisStats redisStatistics = new RedisStats(configuration, server, previousTimeStamp, currentTimeStamp);
         redisStatistics.gatherMetrics();
         logger.info("Successfully printed the metrics for Redis server : " + server.get("name"));
 

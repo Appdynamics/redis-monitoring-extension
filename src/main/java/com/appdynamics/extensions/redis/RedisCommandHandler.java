@@ -32,19 +32,23 @@ public class RedisCommandHandler {
     private JedisPool jedisPool;
     private Logger logger = LoggerFactory.getLogger(RedisCommandHandler.class);
     private CountDownLatch countDownLatch = new CountDownLatch(2);
+    private long previousTimeStamp;
+    private long currentTimeStamp;
 
 
-    protected RedisCommandHandler(Map<String, ?> metricsMap, JedisPool jedisPool, MonitorConfiguration configuration, Map<String, String> server) {
+    protected RedisCommandHandler(Map<String, ?> metricsMap, JedisPool jedisPool, MonitorConfiguration configuration, Map<String, String> server, long previousTimeStamp, long currentTimeStamp) {
         this.metricsMap = metricsMap;
         this.jedisPool = jedisPool;
         this.configuration = configuration;
         this.server = server;
+        this.previousTimeStamp = previousTimeStamp;
+        this.currentTimeStamp = currentTimeStamp;
 
     }
 
     protected void parseMap() {
 
-        SlowLogMetrics slowLogMetricsTask = new SlowLogMetrics(jedisPool, metricsMap, configuration, server, countDownLatch);
+        SlowLogMetrics slowLogMetricsTask = new SlowLogMetrics(jedisPool, metricsMap, configuration, server, countDownLatch, previousTimeStamp, currentTimeStamp);
         configuration.getExecutorService().execute(slowLogMetricsTask);
         Map<String, ? > infoMetricsConfigMap = (Map<String, ?>)metricsMap.get("Info");
         RedisMetrics redisMetricsTask = new RedisMetrics(jedisPool, infoMetricsConfigMap, configuration, server, countDownLatch);

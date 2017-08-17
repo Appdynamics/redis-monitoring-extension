@@ -31,10 +31,14 @@ public class RedisStats {
     public Map<String, String> server;
     private Logger logger = LoggerFactory.getLogger(RedisStats.class);
     private JedisPool jedisPool;
+    private long previousTimeStamp;
+    private long currentTimeStamp;
 
-    RedisStats(MonitorConfiguration configuration, Map<String, String> server) {
+    RedisStats(MonitorConfiguration configuration, Map<String, String> server, long previousTimeStamp, long currentTimeStamp) {
         this.configuration = configuration;
         this.server = server;
+        this.previousTimeStamp = previousTimeStamp;
+        this.currentTimeStamp = currentTimeStamp;
     }
 
     protected void gatherMetrics() {
@@ -66,8 +70,7 @@ public class RedisStats {
         String password = server.get("password");
         String encryptedPassword = server.get("encryptedPassword");
         Map<String, ?> configMap = configuration.getConfigYml();
-
-        String encryptionKey =    configMap.get("encryptionKey").toString();
+        String encryptionKey = configMap.get("encryptionKey").toString();
         if(!Strings.isNullOrEmpty(password)){
             return password;
         }
@@ -91,7 +94,7 @@ public class RedisStats {
 
     private void getMetricsFromInfo(JedisPool jedisPool) {
         Map<String, ?> metricsMap = (Map<String, ?>) configuration.getConfigYml().get("metrics");
-        RedisCommandHandler redisCommandHandler = new RedisCommandHandler(metricsMap, jedisPool, configuration, server);
+        RedisCommandHandler redisCommandHandler = new RedisCommandHandler(metricsMap, jedisPool, configuration, server, previousTimeStamp, currentTimeStamp);
         //configuration.getMetricWriter().on
         redisCommandHandler.parseMap();
     }

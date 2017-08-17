@@ -24,18 +24,22 @@ public class SlowLogMetrics implements Runnable {
     private Map<String, String> metricPropertiesMap;
     //#TODO Check this with Kunal
     //private static SlowLogTimeCache slowLogTimeCache = new SlowLogTimeCache(10);........
-    private static Long mostRecentTimeStampVariable;
+    //private static Long mostRecentTimeStampVariable;
     private final ClusterMetricProcessor clusterMetricProcessor = new ClusterMetricProcessor();
     private static final Logger logger = LoggerFactory.getLogger(RedisMetrics.class);
     private CountDownLatch countDownLatch;
     private static DeltaMetricsCalculator deltaCalculator = new DeltaMetricsCalculator(10);
+    private long previousTimeStamp;
+    private long currentTimeStamp;
 
-    public SlowLogMetrics(JedisPool jedisPool, Map<String, ?> metricsMap, MonitorConfiguration configuration, Map<String, String> server, CountDownLatch countDownLatch){
+    public SlowLogMetrics(JedisPool jedisPool, Map<String, ?> metricsMap, MonitorConfiguration configuration, Map<String, String> server, CountDownLatch countDownLatch, long previousTimeStamp, long currentTimeStamp){
         this.jedisPool = jedisPool;
         this.metricsMap = metricsMap;
         this.server = server;
         this.configuration = configuration;
         this.countDownLatch = countDownLatch;
+        this.previousTimeStamp = previousTimeStamp;
+        this.currentTimeStamp = currentTimeStamp;
     }
 
     public void run() {
@@ -75,29 +79,14 @@ public class SlowLogMetrics implements Runnable {
 
     private int countNumberOfNewSlowLogs(List<Slowlog> slowlogs) {
         int count = 0;
-        //Long mostRecentTimeStampFromCache = slowLogTimeCache.getMostRecentTimeStamp();
-        Long mostRecentTimeStampFromCache = mostRecentTimeStampVariable;
-        logger.info("========================Time from Cache============================" +mostRecentTimeStampFromCache);
-        if(mostRecentTimeStampFromCache == null){
-            mostRecentTimeStampFromCache = Calendar.getInstance().getTimeInMillis() / 1000L;
-            logger.info("===================if null, then get it from calender instance==========" + mostRecentTimeStampFromCache);
-        }
-        logger.info("================Slowlog===================\n");
-        logger.info("List :" + slowlogs);
-        Long mostRecentTimeStamp = mostRecentTimeStampFromCache;
-        for(Slowlog individualLog : slowlogs){
-            Long tempTimeStamp = individualLog.getTimeStamp();
-            //individualLog.get
-            if(tempTimeStamp > mostRecentTimeStampFromCache){
-                count++;
-                if(tempTimeStamp > mostRecentTimeStamp){
-                    mostRecentTimeStamp = tempTimeStamp;
+        if(previousTimeStamp != currentTimeStamp) {
+            for (Slowlog individualLog : slowlogs) {
+                Long tempTimeStamp = individualLog.getTimeStamp();
+                if (tempTimeStamp > previousTimeStamp && tempTimeStamp <= currentTimeStamp) {
+                    count++;
                 }
-
             }
         }
-        //slowLogTimeCache.setMostRecentTimeStamp("mostRecentTimeStamp", mostRecentTimeStamp);
-        mostRecentTimeStampVariable = mostRecentTimeStamp;
         return count;
     }
 
