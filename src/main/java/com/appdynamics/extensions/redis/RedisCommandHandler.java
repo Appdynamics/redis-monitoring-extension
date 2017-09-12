@@ -25,33 +25,29 @@ import redis.clients.jedis.JedisPool;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 
-public class RedisCommandHandler {
-    private Map<String, ?> metricsMap;
+class RedisCommandHandler {
     private MonitorConfiguration configuration;
-    public Map<String, String> server;
+    private Map<String, String> server;
     private JedisPool jedisPool;
     private Logger logger = LoggerFactory.getLogger(RedisCommandHandler.class);
-    private CountDownLatch countDownLatch = new CountDownLatch(2);
+    private CountDownLatch countDownLatch;
     private long previousTimeStamp;
     private long currentTimeStamp;
 
 
-    protected RedisCommandHandler(Map<String, ?> metricsMap, JedisPool jedisPool, MonitorConfiguration configuration, Map<String, String> server, long previousTimeStamp, long currentTimeStamp) {
-        this.metricsMap = metricsMap;
-        this.jedisPool = jedisPool;
+    RedisCommandHandler(MonitorConfiguration configuration, Map<String, String> server, JedisPool jedisPool, long previousTimeStamp, long currentTimeStamp) {
         this.configuration = configuration;
         this.server = server;
+        this.jedisPool = jedisPool;
+        countDownLatch = new CountDownLatch(2);
         this.previousTimeStamp = previousTimeStamp;
         this.currentTimeStamp = currentTimeStamp;
-
     }
 
-    protected void parseMap() {
-
-        SlowLogMetrics slowLogMetricsTask = new SlowLogMetrics(jedisPool, metricsMap, configuration, server, countDownLatch, previousTimeStamp, currentTimeStamp);
+     void parseMap() {
+        SlowLogMetrics slowLogMetricsTask = new SlowLogMetrics(configuration, server, jedisPool, countDownLatch, previousTimeStamp, currentTimeStamp);
         configuration.getExecutorService().execute(slowLogMetricsTask);
-        Map<String, ? > infoMetricsConfigMap = (Map<String, ?>)metricsMap.get("Info");
-        RedisMetrics redisMetricsTask = new RedisMetrics(jedisPool, infoMetricsConfigMap, configuration, server, countDownLatch);
+        RedisMetrics redisMetricsTask = new RedisMetrics(configuration, server, jedisPool, countDownLatch);
         configuration.getExecutorService().execute(redisMetricsTask);
         try{
             countDownLatch.await();

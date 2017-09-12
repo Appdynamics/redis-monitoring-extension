@@ -16,6 +16,7 @@
 package com.appdynamics.extensions.redis;
 
 import com.appdynamics.extensions.conf.MonitorConfiguration;
+import com.appdynamics.extensions.util.AssertUtils;
 import com.appdynamics.extensions.util.MetricWriteHelper;
 import com.appdynamics.extensions.util.MetricWriteHelperFactory;
 import com.singularity.ee.agent.systemagent.api.AManagedMonitor;
@@ -24,15 +25,17 @@ import com.singularity.ee.agent.systemagent.api.TaskOutput;
 import com.singularity.ee.agent.systemagent.api.exception.TaskExecutionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import java.util.List;
 import java.util.Map;
+
 import static com.appdynamics.extensions.redis.utils.Constants.DEFAULT_METRIC_PREFIX;
 
 public class  RedisMonitor extends AManagedMonitor {
     private static final Logger logger = LoggerFactory.getLogger(RedisMonitor.class);
     private MonitorConfiguration configuration;
-    private static long previousTimeStamp = System.currentTimeMillis() / 1000L;
-    private static long currentTimeStamp = System.currentTimeMillis() / 1000L;
+    private static long previousTimeStamp = System.currentTimeMillis();
+    private static long currentTimeStamp = System.currentTimeMillis();
 
     public RedisMonitor(){
         logger.info("Using Redis Monitor Version [" + getImplementationVersion() + "]");
@@ -40,11 +43,12 @@ public class  RedisMonitor extends AManagedMonitor {
 
     public TaskOutput execute(Map<String, String> var1, TaskExecutionContext var2) throws TaskExecutionException{
         logger.debug("The raw arguments are {}" + var1);
+        logger.debug("The previousTimeStamp : {} and the currentTimeStamp : {}",previousTimeStamp, currentTimeStamp);
         initialize(var1);
         configuration.executeTask();
-        //configuration.getMetricWriter().
+        configuration.getMetricWriter().onTaskComplete();
         previousTimeStamp = currentTimeStamp;
-        currentTimeStamp = System.currentTimeMillis()/1000L;
+        currentTimeStamp = System.currentTimeMillis();
         return new TaskOutput("Redis monitor run completed successfully.");
     }
 
@@ -59,8 +63,9 @@ public class  RedisMonitor extends AManagedMonitor {
 
     private class TaskRunner implements Runnable {
         public void run(){
-            List<Map<String,String>> servers = (List<Map<String, String>>) configuration.getConfigYml().get("servers");
-            for(Map<String, String> server : servers) {
+            List<Map<String,String>> servers = (List<Map<String,String>>)configuration.getConfigYml().get("servers");
+            AssertUtils.assertNotNull(servers, "The 'servers' section in config.yml is not initialised");
+            for (Map<String, String> server : servers) {
                 RedisMonitorTask task = new RedisMonitorTask(configuration, server, previousTimeStamp, currentTimeStamp);
                 configuration.getExecutorService().execute(task);
             }
@@ -68,6 +73,6 @@ public class  RedisMonitor extends AManagedMonitor {
     }
 
     private static String getImplementationVersion() {
-        return RedisMonitor.class.getPackage().getImplementationVersion();
+        return RedisMonitor.class.getPackage().getImplementationTitle();
     }
 }

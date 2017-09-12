@@ -2,12 +2,10 @@ package com.appdynamics.extensions.redis.utils;
 
 import com.google.common.base.Splitter;
 import com.google.common.collect.Maps;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
 import java.util.Map;
 
 public class InfoMapExtractor {
-    private static final Logger logger = LoggerFactory.getLogger(InfoMapExtractor.class);
 
     public Map<String, String> extractInfoAsHashMap(String info, String sectionName){
         Map<String, String> infoMap = Maps.newHashMap();

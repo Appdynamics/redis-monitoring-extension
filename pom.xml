@@ -31,7 +31,7 @@
         <dependency>
             <groupId>com.appdynamics</groupId>
             <artifactId>appd-exts-commons</artifactId>
-            <version>1.6.2</version>
+            <version>1.6.7</version>
         </dependency>
         <dependency>
             <groupId>org.yaml</groupId>
@@ -59,6 +59,18 @@
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpclient</artifactId>
             <version>4.3.5</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>log4j</groupId>
+            <artifactId>log4j</artifactId>
+            <version>1.2.17</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-log4j12</artifactId>
+            <version>1.7.11</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -138,7 +150,7 @@
                                         <fileset dir="src/main/resources/conf" includes="config.yml"/>
                                     </copy>
                                     <copy todir="${target.dir}">
-                                        <fileset dir="${build.directory}" includes="${project.artifactId}.${project.packaging}"/>
+                                        <fileset dir="${project.build.directory}" includes="${project.artifactId}.${project.packaging}"/>
                                     </copy>
                                     <zip destfile="${target.dir}-${project.version}.zip">
                                         <zipfileset dir="${target.dir}" filemode="755" prefix="RedisMonitor/"/>

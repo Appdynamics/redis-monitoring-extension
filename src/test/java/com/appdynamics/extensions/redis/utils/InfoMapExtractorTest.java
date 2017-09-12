@@ -14,7 +14,6 @@ import java.util.Map;
  */
 public class InfoMapExtractorTest {
     InfoMapExtractor infoMapExtractor = new InfoMapExtractor();
-    Map<String, String> sectionInfoMap;
     String info;
     @Before
     public void init() throws IOException{
@@ -23,14 +22,18 @@ public class InfoMapExtractorTest {
 
     @Test
     public void sectionDataParseTest() throws IOException{
-
-        sectionInfoMap = infoMapExtractor.extractInfoAsHashMap(info, "Clients");
+        Map<String, String> sectionInfoMap = infoMapExtractor.extractInfoAsHashMap(info, "Clients");
         Assert.assertTrue(sectionInfoMap.get("connected_clients").equals("1"));
         Assert.assertTrue(sectionInfoMap.get("client_longest_output_list").equals("0"));
-        sectionInfoMap = infoMapExtractor.extractInfoAsHashMap(info, "Memory");
-        Assert.assertTrue(sectionInfoMap.get("used_memory").equals("1031856"));
-        Assert.assertTrue(sectionInfoMap.get("used_memory_human").equals("1007.67K"));
+        Map<String, String> sectionInfoMap2 = infoMapExtractor.extractInfoAsHashMap(info, "Memory");
+        Assert.assertTrue(sectionInfoMap2.get("used_memory").equals("1031856"));
+        Assert.assertTrue(sectionInfoMap2.get("used_memory_human").equals("1007.67K"));
+    }
 
+    @Test
+    public void invalidSectionDataParseTest() throws IOException{
+        Map<String, String> sectionInfoMap3 = infoMapExtractor.extractInfoAsHashMap(info, "No");
+        Assert.assertTrue(sectionInfoMap3.size() == 0);
     }
 
 

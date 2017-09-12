@@ -16,18 +16,25 @@
 package com.appdynamics.extensions.redis;
 
 import com.appdynamics.extensions.conf.MonitorConfiguration;
+import com.appdynamics.extensions.crypto.CryptoUtil;
+import com.google.common.base.Strings;
+import com.google.common.collect.Maps;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import redis.clients.jedis.JedisPool;
+import redis.clients.jedis.JedisPoolConfig;
+
 import java.util.Map;
 
-public class RedisMonitorTask implements Runnable {
+class RedisMonitorTask implements Runnable {
     private static final Logger logger = LoggerFactory.getLogger(RedisMonitorTask.class);
     private MonitorConfiguration configuration;
     private Map<String, String> server;
     private long previousTimeStamp;
     private long currentTimeStamp;
+    private JedisPool jedisPool;
 
-    protected RedisMonitorTask(MonitorConfiguration configuration, Map<String, String> server, long previousTimeStamp, long currentTimeStamp) {
+    RedisMonitorTask(MonitorConfiguration configuration, Map<String, String> server, long previousTimeStamp, long currentTimeStamp) {
         this.configuration = configuration;
         this.server = server;
         this.previousTimeStamp = previousTimeStamp;
@@ -39,11 +46,64 @@ public class RedisMonitorTask implements Runnable {
     }
 
     private void populateAndPrintMetrics() {
+        String host = server.get("host");
+        String port = server.get("port");
+        String name = server.get("name");
+        if(!Strings.isNullOrEmpty(host) && !Strings.isNullOrEmpty(port) && !Strings.isNullOrEmpty(name)) {
+            int portNumber = Integer.parseInt(port);
+            String password = getPassword(server);
+            JedisPoolConfig jedisPoolConfig = buildJedisPoolConfig();
+            if (password.trim().length() != 0) {
+                try {
+                    jedisPool = new JedisPool(jedisPoolConfig, host, portNumber, 2000, password);
+                }
+                catch (Exception e) {
+                    logger.info("Exception while creating JedisPool" + e);
+                }
+            }
+            else {
+                try {
+                    jedisPool = new JedisPool(jedisPoolConfig, host, portNumber);
+                }
+                catch (Exception e) {
+                    logger.info("Exception while creating JedisPool" + e);
+                }
+            }
+            getMetricsFromInfo(jedisPool);
+        }
+        else{
+            logger.debug("The host, port and name fields of the server : {} need to be specified", server);
+        }
+    }
 
-        RedisStats redisStatistics = new RedisStats(configuration, server, previousTimeStamp, currentTimeStamp);
-        redisStatistics.gatherMetrics();
-        logger.info("Successfully printed the metrics for Redis server : " + server.get("name"));
+    private String getPassword(Map<String, String> server){
+        String password = server.get("password");
+        String encryptedPassword = server.get("encryptedPassword");
+        Map<String, ?> configMap = configuration.getConfigYml();
+        String encryptionKey = configMap.get("encryptionKey").toString();
+        if(!Strings.isNullOrEmpty(password)){
+            return password;
+        }
+        if(!Strings.isNullOrEmpty(encryptedPassword) && !Strings.isNullOrEmpty(encryptionKey)){
+            Map<String,String> cryptoMap = Maps.newHashMap();
+            cryptoMap.put("password-encrypted", encryptedPassword);
+            cryptoMap.put("encryption-key", encryptionKey);
+            logger.debug("Decrypting the ecncrypted password........");
+            return CryptoUtil.getPassword(cryptoMap);
+        }
+        return "";
 
+    }
+
+    private JedisPoolConfig buildJedisPoolConfig(){
+        JedisPoolConfig jedisPoolConfig = new JedisPoolConfig();
+        jedisPoolConfig.setMaxTotal(3);
+        return jedisPoolConfig;
+    }
+
+    private void getMetricsFromInfo(JedisPool jedisPool) {
+        RedisCommandHandler redisCommandHandler = new RedisCommandHandler(configuration, server, jedisPool, previousTimeStamp, currentTimeStamp);
+        redisCommandHandler.parseMap();
     }
 }
 

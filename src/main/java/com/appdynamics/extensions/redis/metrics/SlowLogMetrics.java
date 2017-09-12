@@ -1,20 +1,21 @@
 package com.appdynamics.extensions.redis.metrics;
 
-import com.appdynamics.extensions.NumberUtils;
 import com.appdynamics.extensions.conf.MonitorConfiguration;
-import com.appdynamics.extensions.redis.utils.Calculators;
-import com.appdynamics.extensions.util.*;
-import com.google.common.base.Strings;
-import com.singularity.ee.agent.systemagent.api.MetricWriter;
+import com.appdynamics.extensions.util.AssertUtils;
+import com.appdynamics.extensions.util.Metric;
+import com.google.common.collect.Lists;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 import redis.clients.util.Slowlog;
-import java.math.BigDecimal;
-import java.util.*;
+import java.util.List;
+import java.util.ListIterator;
+import java.util.Map;
 import java.util.concurrent.CountDownLatch;
-import static com.appdynamics.extensions.redis.utils.Constants.*;
+
+import static com.appdynamics.extensions.redis.utils.Constants.METRIC_SEPARATOR;
+import static com.appdynamics.extensions.redis.utils.Constants.transformAndPrintNodeLevelMetrics;
 
 public class SlowLogMetrics implements Runnable {
     private JedisPool jedisPool;
@@ -22,35 +23,34 @@ public class SlowLogMetrics implements Runnable {
     private MonitorConfiguration configuration;
     private Map<String, String> server;
     private Map<String, String> metricPropertiesMap;
-    //#TODO Check this with Kunal
-    //private static SlowLogTimeCache slowLogTimeCache = new SlowLogTimeCache(10);........
-    //private static Long mostRecentTimeStampVariable;
-    private final ClusterMetricProcessor clusterMetricProcessor = new ClusterMetricProcessor();
-    private static final Logger logger = LoggerFactory.getLogger(RedisMetrics.class);
+    private static final Logger logger = LoggerFactory.getLogger(SlowLogMetrics.class);
     private CountDownLatch countDownLatch;
-    private static DeltaMetricsCalculator deltaCalculator = new DeltaMetricsCalculator(10);
     private long previousTimeStamp;
     private long currentTimeStamp;
+    private List<Map<String, ?>> slowLogMetricsList;
+    private List<Metric> finalMetricList;
 
-    public SlowLogMetrics(JedisPool jedisPool, Map<String, ?> metricsMap, MonitorConfiguration configuration, Map<String, String> server, CountDownLatch countDownLatch, long previousTimeStamp, long currentTimeStamp){
-        this.jedisPool = jedisPool;
-        this.metricsMap = metricsMap;
-        this.server = server;
+    public SlowLogMetrics(MonitorConfiguration configuration, Map<String, String> server, JedisPool jedisPool, CountDownLatch countDownLatch, long previousTimeStamp, long currentTimeStamp){
         this.configuration = configuration;
+        this.server = server;
+        this.jedisPool = jedisPool;
         this.countDownLatch = countDownLatch;
-        this.previousTimeStamp = previousTimeStamp;
-        this.currentTimeStamp = currentTimeStamp;
+        this.previousTimeStamp = previousTimeStamp / 1000L;
+        this.currentTimeStamp = currentTimeStamp / 1000L;
+        metricsMap = (Map<String, ?>)configuration.getConfigYml().get("metrics");
+        AssertUtils.assertNotNull(metricsMap, "There is no 'metrics' section in config.yml");
+        slowLogMetricsList = (List<Map<String, ?>>)metricsMap.get("Slowlog");
+        AssertUtils.assertNotNull(slowLogMetricsList, "There is no 'Slowlog' metrics section under 'metrics' in config.yml");
     }
 
     public void run() {
-        List<Map<String,?>> slowLogMetricsList = (List<Map<String, ?>>)metricsMap.get("Slowlog");
-        if(slowLogMetricsList != null) {
-            metricMapExtractor(slowLogMetricsList);
-            slowLogExtractor();
-        }
+        extractSlowLogPropertiesMap(slowLogMetricsList);
+        finalMetricList = extractSlowLogMetricsList();
+        logger.debug("Printing SlowLog metrics for server {}", server.get("name"));
+        transformAndPrintNodeLevelMetrics(configuration, finalMetricList);
     }
 
-    private void metricMapExtractor(List<Map<String, ?>> slowLogMetricsList) {
+    private void extractSlowLogPropertiesMap(List<Map<String, ?>> slowLogMetricsList) {
         ListIterator<Map<String, ?>> list = slowLogMetricsList.listIterator();
         while(list.hasNext()){
             Map<String, ?> metricEntries = list.next();
@@ -63,18 +63,27 @@ public class SlowLogMetrics implements Runnable {
         }
     }
 
-    private void slowLogExtractor() {
+    private List<Metric> extractSlowLogMetricsList() {
+        List<Metric> finalMetricList = Lists.newArrayList();
         int slowLogCount;
-        if(metricPropertiesMap != null){
-            List<Slowlog> slowlogs;
-            try(Jedis jedis = jedisPool.getResource()) {
-                slowlogs = jedis.slowlogGet(jedis.slowlogLen());
-            }
-            countDownLatch.countDown();
-            slowLogCount = countNumberOfNewSlowLogs(slowlogs);
-            BigDecimal modifiedMetricValue = printNodeLevelMetrics(slowLogCount);
-            printClusterLevelMetrics(modifiedMetricValue);
+        List<Slowlog> slowlogs;
+        try(Jedis jedis = jedisPool.getResource()) {
+            slowlogs = jedis.slowlogGet(jedis.slowlogLen());
         }
+        countDownLatch.countDown();
+        slowLogCount = countNumberOfNewSlowLogs(slowlogs);
+        String metricName = "no_of_new_slow_logs";
+        String metricValue = String.valueOf(slowLogCount);
+        String metricPath = configuration.getMetricPrefix() + METRIC_SEPARATOR + server.get("name") + METRIC_SEPARATOR + "SlowLog" + METRIC_SEPARATOR + "no_of_new_slow_logs";
+        Metric metric;
+        if(metricPropertiesMap != null) {
+            metric = new Metric(metricName, metricValue, metricPath, metricPropertiesMap);
+        }
+        else{
+            metric = new Metric(metricName, metricValue, metricPath);
+        }
+        finalMetricList.add(metric);
+        return finalMetricList;
     }
 
     private int countNumberOfNewSlowLogs(List<Slowlog> slowlogs) {
@@ -87,43 +96,7 @@ public class SlowLogMetrics implements Runnable {
                 }
             }
         }
+        logger.debug("The number of new slow logs between {} and {} are : {}", previousTimeStamp, currentTimeStamp, count);
         return count;
-    }
-
-    private BigDecimal printNodeLevelMetrics(int slowLogValue){
-        MetricWriteHelper metricWriter = configuration.getMetricWriter();
-        String metricPath = configuration.getMetricPrefix() + METRIC_SEPARATOR + server.get("name") + METRIC_SEPARATOR + "SlowLog" + METRIC_SEPARATOR + metricPropertiesMap.get("alias");
-        MetricPropertiesBuilder metricPropertiesBuilder = new MetricPropertiesBuilder(metricPropertiesMap, String.valueOf(slowLogValue), "SlowLog", "no_of_new_slow_logs");
-        MetricProperties currentMetricProperties = metricPropertiesBuilder.buildMetricProperties();
-        BigDecimal metricValue = currentMetricProperties.getInfoValue();
-        Calculators calculators = new Calculators();
-        metricValue = calculators.deltaCalculator(currentMetricProperties, metricPath, metricValue);
-        metricValue = calculators.multiplier(currentMetricProperties, metricValue);
-        currentMetricProperties.setModifiedFinalValue(metricValue);
-        String aggregationType = currentMetricProperties.getAggregation();
-        String timeRollupType = currentMetricProperties.getTime();
-        String clusterRollupType = currentMetricProperties.getCluster();
-        if(metricValue != null) {
-            metricWriter.printMetric(metricPath, String.valueOf(metricValue), aggregationType, timeRollupType, clusterRollupType);
-        }
-        return metricValue;
-
-    }
-
-    private void printClusterLevelMetrics(BigDecimal modifiedSlowLogvalue){
-        MetricWriteHelper metricWriter = configuration.getMetricWriter();
-        AggregatorFactory aggregatorFactory = new AggregatorFactory();
-        clusterMetricProcessor.collect(aggregatorFactory,"no_of_new_slow_logs" ,modifiedSlowLogvalue, metricPropertiesMap);
-        Collection<Aggregator<AggregatorKey>> aggregators = aggregatorFactory.getAggregators();
-        for(Aggregator<AggregatorKey> aggregator: aggregators){
-            Set<AggregatorKey> keys = aggregator.keys();
-            for(AggregatorKey key : keys){
-                BigDecimal value = aggregator.getAggregatedValue(key);
-                String path = configuration.getMetricPrefix() + METRIC_SEPARATOR + "Cluster" + METRIC_SEPARATOR + key.getMetricPath();
-                String splits[] = key.getMetricType().split("\\.");
-                if(splits.length == 3)
-                metricWriter.printMetric(path, value.toString(), splits[0], splits[1], splits[2]);
-            }
-        }
     }
 }

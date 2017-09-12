@@ -71,7 +71,7 @@ sync_partial_ok:0
 sync_partial_err:0
 expired_keys:0
 evicted_keys:0
-keyspace_hits:2
+keyspace_hits:3
 keyspace_misses:2
 pubsub_channels:0
 pubsub_patterns:0

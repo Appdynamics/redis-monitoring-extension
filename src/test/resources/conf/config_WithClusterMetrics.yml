@@ -10,6 +10,10 @@ servers:
     host: "localhost"
     port: "6379"
     password: ""
+  - name: "Server2"
+    host: "localhost"
+    port: "6380"
+    password: ""
 
 
 
@@ -145,6 +149,12 @@ metrics:
             - used_cpu_user_children: #User CPU consumed by the background processes
                 alias: "used_cpu_user_children"
                 multiplier: ""
+
+derivedMetrics:
+    - derivedMetricPath: "Cluster|Stats|keyspace_ratio"
+      formula: "{x}|Stats|keyspace_hits"
+    - derivedMetricPath: "Cluster|SlowLog|no_of_new_slow_logs"
+      formula: "{x}|SlowLog|no_of_new_slow_logs"
 
 
 
