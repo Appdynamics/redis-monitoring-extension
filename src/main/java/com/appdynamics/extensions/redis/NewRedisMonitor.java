@@ -1,5 +1,7 @@
 package com.appdynamics.extensions.redis;
 
+import com.appdynamics.extensions.ABaseMonitor;
+import com.appdynamics.extensions.ATaskExecutor;
 import com.appdynamics.extensions.util.AssertUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -14,17 +16,17 @@ public class NewRedisMonitor extends ABaseMonitor {
     private static long currentTimeStamp = System.currentTimeMillis();
 
     @Override
-    String getDefaultMetricPrefix() {
+    protected String getDefaultMetricPrefix() {
         return "Custom Metrics|Redis";
     }
 
     @Override
-    String getMonitorName() {
+    protected String getMonitorName() {
         return "Redis Monitor";
     }
 
     @Override
-    public void doRun(ATaskExecutor taskExecutor) {
+    protected void doRun(ATaskExecutor taskExecutor) {
         List<Map<String,String>> servers = (List<Map<String,String>>)configuration.getConfigYml().get("servers");
         AssertUtils.assertNotNull(servers, "The 'servers' section in config.yml is not initialised");
         for (Map<String, String> server : servers) {
@@ -34,10 +36,11 @@ public class NewRedisMonitor extends ABaseMonitor {
     }
 
     @Override
-    int getTaskCount() {
+    protected int getTaskCount() {
         List<Map<String,String>> servers = (List<Map<String,String>>)configuration.getConfigYml().get("servers");
         AssertUtils.assertNotNull(servers, "The 'servers' section in config.yml is not initialised");
         return servers.size();
     }
+
 
 }

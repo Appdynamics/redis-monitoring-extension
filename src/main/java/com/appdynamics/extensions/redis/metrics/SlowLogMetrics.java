@@ -48,6 +48,7 @@ public class SlowLogMetrics implements Runnable {
         finalMetricList = extractSlowLogMetricsList();
         logger.debug("Printing SlowLog metrics for server {}", server.get("name"));
         transformAndPrintNodeLevelMetrics(configuration, finalMetricList);
+        countDownLatch.countDown();
     }
 
     private void extractSlowLogPropertiesMap(List<Map<String, ?>> slowLogMetricsList) {
@@ -70,7 +71,6 @@ public class SlowLogMetrics implements Runnable {
         try(Jedis jedis = jedisPool.getResource()) {
             slowlogs = jedis.slowlogGet(jedis.slowlogLen());
         }
-        countDownLatch.countDown();
         slowLogCount = countNumberOfNewSlowLogs(slowlogs);
         String metricName = "no_of_new_slow_logs";
         String metricValue = String.valueOf(slowLogCount);

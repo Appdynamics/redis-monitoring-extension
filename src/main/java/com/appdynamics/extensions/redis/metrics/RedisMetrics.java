@@ -42,10 +42,10 @@ public class RedisMetrics implements Runnable {
 
     public void run() {
         info = extractInfo();
-        countDownLatch.countDown();
         finalMetricList = extractMetricsList();
         logger.debug("Printing Info metrics for server {}", server.get("name"));
         transformAndPrintNodeLevelMetrics(configuration, finalMetricList);
+        countDownLatch.countDown();
     }
 
     private String extractInfo(){

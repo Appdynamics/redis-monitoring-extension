@@ -46,9 +46,9 @@ class RedisCommandHandler {
 
      void parseMap() {
         SlowLogMetrics slowLogMetricsTask = new SlowLogMetrics(configuration, server, jedisPool, countDownLatch, previousTimeStamp, currentTimeStamp);
-        configuration.getExecutorService().execute(slowLogMetricsTask);
+        configuration.getExecutorService().execute("RedisSlowLogMonitorTask",slowLogMetricsTask);
         RedisMetrics redisMetricsTask = new RedisMetrics(configuration, server, jedisPool, countDownLatch);
-        configuration.getExecutorService().execute(redisMetricsTask);
+        configuration.getExecutorService().execute("RedisMetricsExtractionTask",redisMetricsTask);
         try{
             countDownLatch.await();
         }
