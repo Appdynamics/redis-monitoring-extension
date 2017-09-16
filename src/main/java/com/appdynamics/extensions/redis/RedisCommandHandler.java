@@ -21,11 +21,11 @@ import com.appdynamics.extensions.redis.metrics.SlowLogMetrics;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import redis.clients.jedis.JedisPool;
-
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 
 class RedisCommandHandler {
+
     private MonitorConfiguration configuration;
     private Map<String, String> server;
     private JedisPool jedisPool;
@@ -33,7 +33,6 @@ class RedisCommandHandler {
     private CountDownLatch countDownLatch;
     private long previousTimeStamp;
     private long currentTimeStamp;
-
 
     RedisCommandHandler(MonitorConfiguration configuration, Map<String, String> server, JedisPool jedisPool, long previousTimeStamp, long currentTimeStamp) {
         this.configuration = configuration;
@@ -53,11 +52,10 @@ class RedisCommandHandler {
             countDownLatch.await();
         }
         catch(InterruptedException e){
-            e.printStackTrace();
+            logger.debug(e.toString());
         }
         finally {
             jedisPool.destroy();
         }
-
     }
 }

@@ -1,17 +1,17 @@
 package com.appdynamics.extensions.redis.metrics;
 
-import com.appdynamics.extensions.util.Metric;
+import com.appdynamics.extensions.metrics.Metric;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import java.util.List;
 import java.util.Map;
 
 import static com.appdynamics.extensions.redis.utils.Constants.METRIC_SEPARATOR;
 
 class CommonMetricsModifier {
+
     private List<Map<String, ?>> individualSectionFields;
     private Map<String, String> individualSectionInfoMap;
     private String metricPrefix;

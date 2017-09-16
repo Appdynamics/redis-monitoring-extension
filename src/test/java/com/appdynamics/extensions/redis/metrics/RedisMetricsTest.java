@@ -1,9 +1,9 @@
 package com.appdynamics.extensions.redis.metrics;
 
+import com.appdynamics.extensions.MetricWriteHelper;
+import com.appdynamics.extensions.MetricWriteHelperFactory;
 import com.appdynamics.extensions.conf.MonitorConfiguration;
-import com.appdynamics.extensions.util.Metric;
-import com.appdynamics.extensions.util.MetricWriteHelper;
-import com.appdynamics.extensions.util.MetricWriteHelperFactory;
+import com.appdynamics.extensions.metrics.Metric;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.singularity.ee.agent.systemagent.api.AManagedMonitor;
@@ -16,19 +16,17 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mockito;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
-
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
-
 import static org.mockito.Mockito.*;
-
 /**
  * Created by venkata.konala on 8/4/17.
  */
 public class RedisMetricsTest {
+
     private class TaskRunner implements Runnable{
         public void run(){
 
@@ -148,7 +146,6 @@ public class RedisMetricsTest {
         metricPathsList.add("Server|Component:AppLevels|Custom Metrics|Redis|Server1|CPU|used_cpu_sys_children");
         metricPathsList.add("Server|Component:AppLevels|Custom Metrics|Redis|Server1|CPU|used_cpu_user_children");
         metricPathsList.add("Server|Component:AppLevels|Custom Metrics|Redis|Cluster|Memory|total_used_memory");
-
         for (List<Metric> metricList : pathCaptor.getAllValues()){
             for(Metric metric : metricList){
                 org.junit.Assert.assertTrue(metricPathsList.contains(metric.getMetricPath()));
@@ -181,7 +178,6 @@ public class RedisMetricsTest {
         server1.put("name", "Server1");
         RedisMetrics redisMetrics1 = new RedisMetrics(monitorConfiguration, server1, jedisPool, countDownLatch);
         redisMetrics1.run();
-
         String info2 = FileUtils.readFileToString(new File("src/test/resources/info2.txt"));
         when(jedis.info()).thenReturn(info2);
         Map<String, String> server2 = Maps.newHashMap();
@@ -203,5 +199,4 @@ public class RedisMetricsTest {
         }
         org.junit.Assert.assertTrue(count == 2);
     }
-
 }

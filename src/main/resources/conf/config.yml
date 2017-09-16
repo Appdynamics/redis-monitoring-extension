@@ -1,6 +1,5 @@
 #This will populate the metrics in all the tiers, under this path(not recommended)
 #metricPrefix: "Custom Metrics|Redis"
-
 #The following prefix will populate the metrics under one tier
 metricPrefix: "Server|Component:AppLevels|Custom Metrics|Redis"
 
@@ -10,7 +9,9 @@ servers:
     host: "localhost"
     port: "6379"
     password: ""
+    encryptedPassword: ""
 
+#Encryption key for Encrypted password.
 encryptionKey: ""
 
 # Each server instance needs 3 threads, one for the server instance itself, one for info call to the Redis server and one for slowlog call to the server.
@@ -18,17 +19,16 @@ encryptionKey: ""
 numberOfThreads: 20
 
 #                                      List of metrics
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#Glossary of terms(These terms are used as properties for each metric):                                                                                                          }
-#   alias                                                                                                                                                                        }
-#   aggregationType                                                                                                                                                              }
-#   aggregateAtCluster --> not for derived metrics                                                                                                                               }
-#   clusterRollUp                                                                                                                                                                }
-#   convert --> not for derived metrics                                                                                                                                          }
-#   delta --> not for derived metrics                                                                                                                                            }                                                                                                                                                                    }
-#   multiplier -->not for derived metrics                                                                                                                                        }
-#   timeRollUp                                                                                                                                                                   }
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+#Glossary of terms(These terms are used as properties for each metric):
+#   alias
+#   aggregationType
+#   timeRollUpType
+#   clusterRollUpType                                                                                                                                                                                                                                                                                                                                                                                                                                                                            }
+#   multiplier -->not for derived metrics
+#   convert --> not for derived metrics
+#   delta --> not for derived metrics
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 metrics:
     Slowlog:
         - no_of_new_slow_logs:
@@ -37,16 +37,6 @@ metrics:
         Clients: #Information about the client connections
             - connected_clients: #Number of client connections (excluding connections from slaves)
                 alias: "connected_clients"
-                multiplier: "2.0"
-            - total messages:
-              alias:
-            - total messages:
-              metricName:
-
-            - client_longest_output_list: #Longest output list among current client connections
-                alias: "client_longest_output_list"
-            - client_biggest_input_buf: #Biggest input buffer among current client connections
-                alias: "client_biggest_input_buf"
             - blocked_clients: #Number of clients pending on a blocking call(BLPOP, BRPOP, BRPOPLPUSH)
                 alias: "blocked_clients"
 
@@ -89,24 +79,21 @@ metrics:
                 alias: "evicted_keys"
             - keyspace_hits: #Number of successful lookup of keys in the main dictionary
                 alias: "keyspace_hits"
-                multiplier : "0.001"
-            - keyspace_hits:
-                alias: "keyspace_hits_no_multi"
             - keyspace_misses: #Number of failed lookup of keys in the main dictionary
                 alias: "keyspace_misses"
-                multiplier : "0.001"
             - pubsub_channels: #Global number of pub/sub channels with client subscriptions
                 alias: "pubsub_channels"
             - pubsub_patterns: #Global number of pub/sub pattern with client subscriptions
                 alias: "pubsub_patterns"
             - latest_fork_usec: #Duration of the latest fork operation in microseconds
                 alias: "latest_fork_usec"
-            - keyspace_hit_ratio:
-                derived: true
-                formula:
-
 
         Replication: #Information related to Master/Slave replication
+            - role:
+                alias: "role"
+                convert:
+                    master: "1"
+                    slave: "0"
             - connected_slaves: #Number of connected slaves
                 alias: "connected_slaves"
 
@@ -120,13 +107,6 @@ metrics:
             - used_cpu_user_children: #User CPU consumed by the background processes
                 alias: "used_cpu_user_children"
 
-
-
-derived:
-    - keyspace_hit_ratio:
-         alias: "keyspace_hit_ratio"
-         multiplier: ""
-         formula: "keyspace_hits / (keyspace_hits + keyspace_misses)"
 
 
 

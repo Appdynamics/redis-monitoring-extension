@@ -1,23 +1,21 @@
 package com.appdynamics.extensions.redis.metrics;
 
 import com.appdynamics.extensions.conf.MonitorConfiguration;
+import com.appdynamics.extensions.metrics.Metric;
 import com.appdynamics.extensions.redis.utils.InfoMapExtractor;
 import com.appdynamics.extensions.util.AssertUtils;
-import com.appdynamics.extensions.util.Metric;
 import com.google.common.collect.Lists;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
-
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
-
 import static com.appdynamics.extensions.redis.utils.Constants.METRIC_SEPARATOR;
-import static com.appdynamics.extensions.redis.utils.Constants.transformAndPrintNodeLevelMetrics;
 
 public class RedisMetrics implements Runnable {
+
     private JedisPool jedisPool;
     private String info;
     private Map<String, ?> metricsMap;
@@ -44,7 +42,7 @@ public class RedisMetrics implements Runnable {
         info = extractInfo();
         finalMetricList = extractMetricsList();
         logger.debug("Printing Info metrics for server {}", server.get("name"));
-        transformAndPrintNodeLevelMetrics(configuration, finalMetricList);
+        configuration.getMetricWriter().transformAndPrintNodeLevelMetrics(finalMetricList);
         countDownLatch.countDown();
     }
 

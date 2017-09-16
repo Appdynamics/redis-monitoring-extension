@@ -126,7 +126,7 @@
                                     <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
                                         <manifestEntries>
                                             <Main-Class>com.appdynamics.extensions.workbench.WorkbenchServerLauncher</Main-Class>
-                                            <Implementation-Title>Redis Monitor v${project.version} Build Date ${maven.build.timestamp}</Implementation-Title>
+                                            <Implementation-Title>v${project.version} Build Date ${maven.build.timestamp}</Implementation-Title>
                                         </manifestEntries>
                                     </transformer>
                                 </transformers>
@@ -190,8 +190,4 @@
             <url>https://github.com/Appdynamics/maven-repo/raw/master/releases</url>
         </repository>
     </repositories>
-
-
-
-
 </project>

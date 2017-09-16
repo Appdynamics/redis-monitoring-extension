@@ -27,6 +27,7 @@ import redis.clients.jedis.JedisPoolConfig;
 import java.util.Map;
 
 class RedisMonitorTask implements Runnable {
+
     private static final Logger logger = LoggerFactory.getLogger(RedisMonitorTask.class);
     private MonitorConfiguration configuration;
     private Map<String, String> server;
