@@ -10,13 +10,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
-
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
-
 import static com.appdynamics.extensions.redis.utils.Constants.METRIC_SEPARATOR;
-import static com.appdynamics.extensions.redis.utils.Constants.connectionStatus;
 
 public class InfoMetrics implements Runnable {
 
@@ -52,7 +49,7 @@ public class InfoMetrics implements Runnable {
             metricWriteHelper.transformAndPrintMetrics(finalMetricList);
         }
         catch(Exception e){
-
+            logger.error(e.getMessage());
         }
         finally {
             countDownLatch.countDown();
@@ -60,13 +57,23 @@ public class InfoMetrics implements Runnable {
     }
 
     private String extractInfo(){
-        String infoFromRedis;
-        try(Jedis jedis = jedisPool.getResource()){
-            if(jedis.isConnected()){
-                connectionStatus = 1;
-            }
+        int connectionStatus = 0;
+        String infoFromRedis = null;
+        Jedis jedis = null;
+        try{
+            jedis = jedisPool.getResource();
             infoFromRedis = jedis.info();
+            connectionStatus = 1;
         }
+        catch(Exception e){
+            logger.error(e.getMessage());
+        }
+        finally {
+            if(jedis != null) {
+                jedis.close();
+            }
+        }
+        metricWriteHelper.printMetric(configuration.getMetricPrefix() + "|" + server.get("name") + "|" + "connectionStatus", String.valueOf(connectionStatus), "AVERAGE", "AVERAGE", "INDIVIDUAL");
         return infoFromRedis;
     }
 

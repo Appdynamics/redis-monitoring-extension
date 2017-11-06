@@ -44,6 +44,8 @@ public class RedisMonitor extends ABaseMonitor {
 
     @Override
     protected void doRun(TasksExecutionServiceProvider serviceProvider) {
+        previousTimeStamp = currentTimeStamp;
+        currentTimeStamp = System.currentTimeMillis();
         List<Map<String,String>> servers = (List<Map<String,String>>)configuration.getConfigYml().get("servers");
         AssertUtils.assertNotNull(servers, "The 'servers' section in config.yml is not initialised");
         for (Map<String, String> server : servers) {

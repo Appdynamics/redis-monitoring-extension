@@ -1,13 +1,9 @@
 package com.appdynamics.extensions.redis.metrics;
 
-import com.appdynamics.extensions.ABaseMonitor;
 import com.appdynamics.extensions.AMonitorJob;
 import com.appdynamics.extensions.MetricWriteHelper;
 import com.appdynamics.extensions.conf.MonitorConfiguration;
-import com.appdynamics.extensions.conf.modules.DerivedMetricsModule;
 import com.appdynamics.extensions.metrics.Metric;
-import com.appdynamics.extensions.metrics.derived.DerivedMetricsCalculator;
-import com.appdynamics.extensions.yml.YmlReader;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import org.apache.commons.io.FileUtils;

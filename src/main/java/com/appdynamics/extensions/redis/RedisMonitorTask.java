@@ -29,8 +29,6 @@ import redis.clients.jedis.JedisPoolConfig;
 
 import java.util.Map;
 
-import static com.appdynamics.extensions.redis.utils.Constants.connectionStatus;
-
 class RedisMonitorTask implements AMonitorTaskRunnable {
 
     private static final Logger logger = LoggerFactory.getLogger(RedisMonitorTask.class);
@@ -101,7 +99,6 @@ class RedisMonitorTask implements AMonitorTaskRunnable {
             return CryptoUtil.getPassword(cryptoMap);
         }
         return "";
-
     }
 
     private JedisPoolConfig buildJedisPoolConfig(){
@@ -117,7 +114,7 @@ class RedisMonitorTask implements AMonitorTaskRunnable {
 
     @Override
     public void onTaskComplete() {
-        metricWriteHelper.printMetric(configuration.getMetricPrefix() + "|" + server.get("name") + "|" + "connectionStatus", String.valueOf(connectionStatus), "AVERAGE", "AVERAGE", "INDIVIDUAL");
+
 
     }
 }
