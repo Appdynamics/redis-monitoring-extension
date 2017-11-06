@@ -64,7 +64,7 @@ class RedisMonitorTask implements AMonitorTaskRunnable {
             if (password.trim().length() != 0) {
                 try {
                     jedisPool = new JedisPool(jedisPoolConfig, host, portNumber, 2000, password);
-                    connectionStatus = 1;
+
                 }
                 catch (Exception e) {
                     logger.error("Exception while creating JedisPool" + e);
@@ -73,7 +73,6 @@ class RedisMonitorTask implements AMonitorTaskRunnable {
             else {
                 try {
                     jedisPool = new JedisPool(jedisPoolConfig, host, portNumber);
-                    connectionStatus = 1;
                 }
                 catch (Exception e) {
                     logger.error("Exception while creating JedisPool" + e);

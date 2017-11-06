@@ -16,6 +16,7 @@ import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 
 import static com.appdynamics.extensions.redis.utils.Constants.METRIC_SEPARATOR;
+import static com.appdynamics.extensions.redis.utils.Constants.connectionStatus;
 
 public class InfoMetrics implements Runnable {
 
@@ -47,6 +48,7 @@ public class InfoMetrics implements Runnable {
             AssertUtils.assertNotNull(infoMap, "There is no 'Info' metrics section under 'metrics' in config.yml");
             info = extractInfo();
             finalMetricList = extractMetricsList();
+            connectionStatus = 1;
             logger.debug("Printing Info metrics for server {}", server.get("name"));
             metricWriteHelper.transformAndPrintMetrics(finalMetricList);
         }

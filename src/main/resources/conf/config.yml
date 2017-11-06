@@ -1,7 +1,7 @@
 #This will populate the metrics in all the tiers, under this path(not recommended)
 #metricPrefix: "Custom metrics|Redis"
 #The following prefix will populate the metrics under one tier
-metricPrefix: "Server|Component:<TIER NAME OR TIER ID>|Custom metrics|Redis"
+metricPrefix: "Server|Component:<TIER NAME OR TIER ID>|Custom Metrics|Redis"
 
 #Add your list of Redis servers here.
 servers:
@@ -107,6 +107,14 @@ metrics:
                 alias: "used_cpu_sys_children"
             - used_cpu_user_children: #User CPU consumed by the background processes
                 alias: "used_cpu_user_children"
+
+derivedMetrics:
+    - derivedMetricPath: "{x}|Stats|keyspace_ratio"
+      formula: "{x}|Stats|keyspace_hits / ({x}|Stats|keyspace_hits + {x}|Stats|keyspace_misses)"
+
+
+
+
 
 
 

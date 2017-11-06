@@ -112,9 +112,7 @@ metrics:
             - latest_fork_usec: #Duration of the latest fork operation in microseconds
                 alias: "latest_fork_usec"
                 multiplier: ""
-            - keyspace_hit_ratio:
-                alias: "keyspace_hit_ratio"
-                multiplier: ""
+
 
         Replication: #Information related to Master/Slave replication
             - connected_slaves: #Number of connected slaves
