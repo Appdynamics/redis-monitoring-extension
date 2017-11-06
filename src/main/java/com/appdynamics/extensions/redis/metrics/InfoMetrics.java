@@ -10,9 +10,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
+
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
+
 import static com.appdynamics.extensions.redis.utils.Constants.METRIC_SEPARATOR;
 
 public class InfoMetrics implements Runnable {
