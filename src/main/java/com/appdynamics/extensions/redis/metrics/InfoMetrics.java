@@ -48,7 +48,6 @@ public class InfoMetrics implements Runnable {
             AssertUtils.assertNotNull(infoMap, "There is no 'Info' metrics section under 'metrics' in config.yml");
             info = extractInfo();
             finalMetricList = extractMetricsList();
-            connectionStatus = 1;
             logger.debug("Printing Info metrics for server {}", server.get("name"));
             metricWriteHelper.transformAndPrintMetrics(finalMetricList);
         }
@@ -63,6 +62,9 @@ public class InfoMetrics implements Runnable {
     private String extractInfo(){
         String infoFromRedis;
         try(Jedis jedis = jedisPool.getResource()){
+            if(jedis.isConnected()){
+                connectionStatus = 1;
+            }
             infoFromRedis = jedis.info();
         }
         return infoFromRedis;
