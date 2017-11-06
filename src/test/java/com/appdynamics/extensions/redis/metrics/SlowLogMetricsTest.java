@@ -1,52 +1,36 @@
 package com.appdynamics.extensions.redis.metrics;
 
+import com.appdynamics.extensions.AMonitorJob;
 import com.appdynamics.extensions.MetricWriteHelper;
-import com.appdynamics.extensions.MetricWriteHelperFactory;
 import com.appdynamics.extensions.conf.MonitorConfiguration;
 import com.appdynamics.extensions.metrics.Metric;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.singularity.ee.agent.systemagent.api.AManagedMonitor;
-import com.singularity.ee.agent.systemagent.api.TaskExecutionContext;
-import com.singularity.ee.agent.systemagent.api.TaskOutput;
-import com.singularity.ee.agent.systemagent.api.exception.TaskExecutionException;
 import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
-import org.mockito.Mockito;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 import redis.clients.util.Slowlog;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
+
 import static org.mockito.Mockito.*;
 
 public class SlowLogMetricsTest {
 
-    private class TaskRunner implements Runnable{
-        public void run(){
-
-        }
-    }
-    AManagedMonitor aManagedMonitor = new AManagedMonitor() {
-        @Override
-        public TaskOutput execute(Map<String, String> map, TaskExecutionContext taskExecutionContext) throws TaskExecutionException {
-            return null;
-        }
-    };
-    private static final Logger logger = LoggerFactory.getLogger(SlowLogMetricsTest.class);
-
     @Test
     public void slowogMetricsTest() throws IOException {
+
         ArgumentCaptor<List> pathCaptor = ArgumentCaptor.forClass(List.class);
-        MetricWriteHelper metricWriteHelper = Mockito.spy(MetricWriteHelperFactory.create(aManagedMonitor));
-        MonitorConfiguration monitorConfiguration = new MonitorConfiguration("Custom Metrics|Redis|", new SlowLogMetricsTest.TaskRunner(), metricWriteHelper);
-        monitorConfiguration.setConfigYml("src/test/resources/conf/config.yml");
+        AMonitorJob aMonitorJob = mock(AMonitorJob.class);
+        MonitorConfiguration configuration = new MonitorConfiguration("Redis Monitor", "Custom Metrics|Redis", aMonitorJob);
+        configuration.setConfigYml("src/test/resources/conf/config.yml");
+        MetricWriteHelper metricWriteHelper = mock(MetricWriteHelper.class);
         JedisPool jedisPool = mock(JedisPool.class);
         Jedis jedis = mock(Jedis.class);
         CountDownLatch countDownLatch = new CountDownLatch(1);
@@ -75,21 +59,22 @@ public class SlowLogMetricsTest {
         server.put("host", "localhost");
         server.put("port", "6379");
         server.put("name", "Server1");
-        SlowLogMetrics slowLogMetrics = new SlowLogMetrics(monitorConfiguration, server, jedisPool, countDownLatch, 1505158200000L, 1505158220000L);
+        SlowLogMetrics slowLogMetrics = new SlowLogMetrics(configuration, server, metricWriteHelper, jedisPool, countDownLatch, 1505158200000L, 1505158220000L);
         slowLogMetrics.run();
-        verify(metricWriteHelper).printMetric(pathCaptor.capture());
+        verify(metricWriteHelper).transformAndPrintMetrics(pathCaptor.capture());
         for (Metric metric : (List<Metric>)pathCaptor.getValue()){
-            Assert.assertTrue(metric.getMetricPath().equals("Server|Component:AppLevels|Custom Metrics|Redis|Server1|SlowLog|no_of_new_slow_logs"));
+            Assert.assertTrue(metric.getMetricPath().equals("Server|Component:AppLevels|Custom metrics|Redis|Server1|SlowLog|no_of_new_slow_logs"));
             Assert.assertTrue(metric.getMetricValue().equals("2"));
         }
     }
 
-    @Test
+    /*@Test
     public void slowLogMetricsWithClusterTest() throws IOException {
         ArgumentCaptor<List> pathCaptor = ArgumentCaptor.forClass(List.class);
-        MetricWriteHelper metricWriteHelper = Mockito.spy(MetricWriteHelperFactory.create(aManagedMonitor));
-        MonitorConfiguration monitorConfiguration = new MonitorConfiguration("Custom Metrics|Redis|", new SlowLogMetricsTest.TaskRunner(), metricWriteHelper);
+        AMonitorJob aMonitorJob = mock(AMonitorJob.class);
+        MonitorConfiguration monitorConfiguration = new MonitorConfiguration("Redis Monitor", "Custom Metrics|Redis",  aMonitorJob);
         monitorConfiguration.setConfigYml("src/test/resources/conf/config_WithClusterMetrics.yml");
+        MetricWriteHelper metricWriteHelper = mock(MetricWriteHelper.class);
         JedisPool jedisPool = mock(JedisPool.class);
         Jedis jedis = mock(Jedis.class);
         CountDownLatch countDownLatch = new CountDownLatch(1);
@@ -127,7 +112,7 @@ public class SlowLogMetricsTest {
         server.put("host", "localhost");
         server.put("port", "6379");
         server.put("name", "Server1");
-        SlowLogMetrics slowLogMetrics = new SlowLogMetrics(monitorConfiguration, server, jedisPool, countDownLatch, 1505158200000L, 1505158220000L);
+        SlowLogMetrics slowLogMetrics = new SlowLogMetrics(monitorConfiguration, server, metricWriteHelper, jedisPool, countDownLatch, 1505158200000L, 1505158220000L);
         slowLogMetrics.run();
         List<Object> objectList2 = Lists.newArrayList();
         List list4 = new ArrayList();
@@ -153,14 +138,14 @@ public class SlowLogMetricsTest {
         server2.put("host", "localhost");
         server2.put("port", "6380");
         server2.put("name", "Server2");
-        SlowLogMetrics slowLogMetrics2 = new SlowLogMetrics(monitorConfiguration, server2, jedisPool, countDownLatch, 1505158200000L, 1505158220000L);
+        SlowLogMetrics slowLogMetrics2 = new SlowLogMetrics(monitorConfiguration, server2, metricWriteHelper, jedisPool, countDownLatch, 1505158200000L, 1505158220000L);
         slowLogMetrics2.run();
-        metricWriteHelper.onTaskComplete();
-        verify(metricWriteHelper,times(3)).printMetric(pathCaptor.capture());
+        metricWriteHelper.onComplete();
+        verify(metricWriteHelper,times(2)).transformAndPrintMetrics(pathCaptor.capture());
         int count = 0;
         for (List<Metric> metricList : pathCaptor.getAllValues()){
             for(Metric metric : metricList){
-                if(metric.getMetricPath().equals("Server|Component:AppLevels|Custom Metrics|Redis|Cluster|SlowLog|no_of_new_slow_logs")){
+                if(metric.getMetricPath().equals("Server|Component:AppLevels|Custom metrics|Redis|Cluster|SlowLog|no_of_new_slow_logs")){
                     Assert.assertTrue(metric.getMetricValue().equals("3") || metric.getMetricValue().equals("2"));
                     count++;
                 }
@@ -168,5 +153,5 @@ public class SlowLogMetricsTest {
 
         }
         Assert.assertTrue(count == 2);
-    }
+    }*/
 }

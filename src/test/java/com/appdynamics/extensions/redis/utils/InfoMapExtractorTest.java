@@ -4,12 +4,13 @@ import org.apache.commons.io.FileUtils;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.Map;
-/**
- * Created by venkata.konala on 8/4/17.
- */
+
+
+
 public class InfoMapExtractorTest {
 
     InfoMapExtractor infoMapExtractor = new InfoMapExtractor();

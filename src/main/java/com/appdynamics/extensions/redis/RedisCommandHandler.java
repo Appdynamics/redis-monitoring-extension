@@ -15,12 +15,14 @@
  */
 package com.appdynamics.extensions.redis;
 
+import com.appdynamics.extensions.MetricWriteHelper;
 import com.appdynamics.extensions.conf.MonitorConfiguration;
-import com.appdynamics.extensions.redis.metrics.RedisMetrics;
+import com.appdynamics.extensions.redis.metrics.InfoMetrics;
 import com.appdynamics.extensions.redis.metrics.SlowLogMetrics;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import redis.clients.jedis.JedisPool;
+
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 
@@ -28,31 +30,33 @@ class RedisCommandHandler {
 
     private MonitorConfiguration configuration;
     private Map<String, String> server;
+    private MetricWriteHelper metricWriteHelper;
     private JedisPool jedisPool;
     private Logger logger = LoggerFactory.getLogger(RedisCommandHandler.class);
     private CountDownLatch countDownLatch;
     private long previousTimeStamp;
     private long currentTimeStamp;
 
-    RedisCommandHandler(MonitorConfiguration configuration, Map<String, String> server, JedisPool jedisPool, long previousTimeStamp, long currentTimeStamp) {
+    RedisCommandHandler(MonitorConfiguration configuration, Map<String, String> server, MetricWriteHelper metricWriteHelper, JedisPool jedisPool, long previousTimeStamp, long currentTimeStamp) {
         this.configuration = configuration;
         this.server = server;
+        this.metricWriteHelper = metricWriteHelper;
         this.jedisPool = jedisPool;
         countDownLatch = new CountDownLatch(2);
         this.previousTimeStamp = previousTimeStamp;
         this.currentTimeStamp = currentTimeStamp;
     }
 
-     void parseMap() {
-        SlowLogMetrics slowLogMetricsTask = new SlowLogMetrics(configuration, server, jedisPool, countDownLatch, previousTimeStamp, currentTimeStamp);
-        configuration.getExecutorService().execute("RedisSlowLogMonitorTask",slowLogMetricsTask);
-        RedisMetrics redisMetricsTask = new RedisMetrics(configuration, server, jedisPool, countDownLatch);
-        configuration.getExecutorService().execute("RedisMetricsExtractionTask",redisMetricsTask);
+     void triggerCommandsToRedisServer() {
+        SlowLogMetrics slowLogMetricsTask = new SlowLogMetrics(configuration, server, metricWriteHelper, jedisPool, countDownLatch, previousTimeStamp, currentTimeStamp);
+        configuration.getExecutorService().execute("SlowLogMetricsTask",slowLogMetricsTask);
+        InfoMetrics infoMetricsTask = new InfoMetrics(configuration, server, metricWriteHelper, jedisPool, countDownLatch);
+        configuration.getExecutorService().execute("InfoMetricsTask", infoMetricsTask);
         try{
             countDownLatch.await();
         }
         catch(InterruptedException e){
-            logger.debug(e.toString());
+            logger.error(e.toString());
         }
         finally {
             jedisPool.destroy();

@@ -15,6 +15,9 @@
  */
 package com.appdynamics.extensions.redis;
 
+import com.appdynamics.extensions.AMonitorTaskRunnable;
+import com.appdynamics.extensions.MetricWriteHelper;
+import com.appdynamics.extensions.TasksExecutionServiceProvider;
 import com.appdynamics.extensions.conf.MonitorConfiguration;
 import com.appdynamics.extensions.crypto.CryptoUtil;
 import com.google.common.base.Strings;
@@ -26,18 +29,22 @@ import redis.clients.jedis.JedisPoolConfig;
 
 import java.util.Map;
 
-class RedisMonitorTask implements Runnable {
+import static com.appdynamics.extensions.redis.utils.Constants.connectionStatus;
+
+class RedisMonitorTask implements AMonitorTaskRunnable {
 
     private static final Logger logger = LoggerFactory.getLogger(RedisMonitorTask.class);
     private MonitorConfiguration configuration;
     private Map<String, String> server;
+    private MetricWriteHelper metricWriteHelper;
     private long previousTimeStamp;
     private long currentTimeStamp;
     private JedisPool jedisPool;
 
-    RedisMonitorTask(MonitorConfiguration configuration, Map<String, String> server, long previousTimeStamp, long currentTimeStamp) {
-        this.configuration = configuration;
+    RedisMonitorTask(TasksExecutionServiceProvider serviceProvider, Map<String, String> server, long previousTimeStamp, long currentTimeStamp) {
+        this.configuration = serviceProvider.getMonitorConfiguration();
         this.server = server;
+        this.metricWriteHelper = serviceProvider.getMetricWriteHelper();
         this.previousTimeStamp = previousTimeStamp;
         this.currentTimeStamp = currentTimeStamp;
     }
@@ -57,17 +64,19 @@ class RedisMonitorTask implements Runnable {
             if (password.trim().length() != 0) {
                 try {
                     jedisPool = new JedisPool(jedisPoolConfig, host, portNumber, 2000, password);
+                    connectionStatus = 1;
                 }
                 catch (Exception e) {
-                    logger.info("Exception while creating JedisPool" + e);
+                    logger.error("Exception while creating JedisPool" + e);
                 }
             }
             else {
                 try {
                     jedisPool = new JedisPool(jedisPoolConfig, host, portNumber);
+                    connectionStatus = 1;
                 }
                 catch (Exception e) {
-                    logger.info("Exception while creating JedisPool" + e);
+                    logger.error("Exception while creating JedisPool" + e);
                 }
             }
             getMetricsFromInfo(jedisPool);
@@ -103,8 +112,14 @@ class RedisMonitorTask implements Runnable {
     }
 
     private void getMetricsFromInfo(JedisPool jedisPool) {
-        RedisCommandHandler redisCommandHandler = new RedisCommandHandler(configuration, server, jedisPool, previousTimeStamp, currentTimeStamp);
-        redisCommandHandler.parseMap();
+        RedisCommandHandler redisCommandHandler = new RedisCommandHandler(configuration, server, metricWriteHelper, jedisPool, previousTimeStamp, currentTimeStamp);
+        redisCommandHandler.triggerCommandsToRedisServer();
+    }
+
+    @Override
+    public void onTaskComplete() {
+        metricWriteHelper.printMetric(configuration.getMetricPrefix() + "|" + server.get("name") + "|" + "connectionStatus", String.valueOf(connectionStatus), "AVERAGE", "AVERAGE", "INDIVIDUAL");
+
     }
 }
 

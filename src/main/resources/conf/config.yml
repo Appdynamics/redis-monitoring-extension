@@ -1,7 +1,7 @@
 #This will populate the metrics in all the tiers, under this path(not recommended)
-#metricPrefix: "Custom Metrics|Redis"
+#metricPrefix: "Custom metrics|Redis"
 #The following prefix will populate the metrics under one tier
-metricPrefix: "Server|Component:AppLevels|Custom Metrics|Redis"
+metricPrefix: "Server|Component:<TIER NAME OR TIER ID>|Custom metrics|Redis"
 
 #Add your list of Redis servers here.
 servers:
@@ -51,6 +51,7 @@ metrics:
                 alias: "used_memory_lua"
             - mem_fragmentation_ratio: #Ratio between used_memory_rss and used_memory
                 alias: "mem_fragmentation_ratio"
+
 
         Persistence: #Information related to RDB and AOF
             - rdb_changes_since_last_save: #Number of changes since the last dump

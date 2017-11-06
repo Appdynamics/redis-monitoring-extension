@@ -1,5 +1,6 @@
 package com.appdynamics.extensions.redis.metrics;
 
+import com.appdynamics.extensions.MetricWriteHelper;
 import com.appdynamics.extensions.conf.MonitorConfiguration;
 import com.appdynamics.extensions.metrics.Metric;
 import com.appdynamics.extensions.redis.utils.InfoMapExtractor;
@@ -9,12 +10,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
+
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
+
 import static com.appdynamics.extensions.redis.utils.Constants.METRIC_SEPARATOR;
 
-public class RedisMetrics implements Runnable {
+public class InfoMetrics implements Runnable {
 
     private JedisPool jedisPool;
     private String info;
@@ -23,27 +26,36 @@ public class RedisMetrics implements Runnable {
     private List<Metric> finalMetricList;
     private MonitorConfiguration configuration;
     private Map<String, String> server;
-    private static final Logger logger = LoggerFactory.getLogger(RedisMetrics.class);
+    private MetricWriteHelper metricWriteHelper;
+    private static final Logger logger = LoggerFactory.getLogger(InfoMetrics.class);
     private CountDownLatch countDownLatch;
 
-    public RedisMetrics(MonitorConfiguration configuration, Map<String, String> server, JedisPool jedisPool, CountDownLatch countDownLatch) {
+    public InfoMetrics(MonitorConfiguration configuration, Map<String, String> server, MetricWriteHelper metricWriteHelper, JedisPool jedisPool, CountDownLatch countDownLatch) {
         this.configuration = configuration;
         this.server = server;
+        this.metricWriteHelper = metricWriteHelper;
         this.jedisPool = jedisPool;
         this.countDownLatch = countDownLatch;
         finalMetricList = Lists.newArrayList();
-        metricsMap = (Map<String, ?>)configuration.getConfigYml().get("metrics");
-        AssertUtils.assertNotNull(metricsMap, "There is no 'metrics' section in config.yml");
-        infoMap = (Map<String, ?>)metricsMap.get("Info");
-        AssertUtils.assertNotNull(infoMap, "There is no 'Info' metrics section under 'metrics' in config.yml");
     }
 
     public void run() {
-        info = extractInfo();
-        finalMetricList = extractMetricsList();
-        logger.debug("Printing Info metrics for server {}", server.get("name"));
-        configuration.getMetricWriter().transformAndPrintNodeLevelMetrics(finalMetricList);
-        countDownLatch.countDown();
+        try {
+            metricsMap = (Map<String, ?>)configuration.getConfigYml().get("metrics");
+            AssertUtils.assertNotNull(metricsMap, "There is no 'metrics' section in config.yml");
+            infoMap = (Map<String, ?>)metricsMap.get("Info");
+            AssertUtils.assertNotNull(infoMap, "There is no 'Info' metrics section under 'metrics' in config.yml");
+            info = extractInfo();
+            finalMetricList = extractMetricsList();
+            logger.debug("Printing Info metrics for server {}", server.get("name"));
+            metricWriteHelper.transformAndPrintMetrics(finalMetricList);
+        }
+        catch(Exception e){
+
+        }
+        finally {
+            countDownLatch.countDown();
+        }
     }
 
     private String extractInfo(){

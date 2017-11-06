@@ -1,5 +1,6 @@
 package com.appdynamics.extensions.redis.metrics;
 
+import com.appdynamics.extensions.MetricWriteHelper;
 import com.appdynamics.extensions.conf.MonitorConfiguration;
 import com.appdynamics.extensions.metrics.Metric;
 import com.appdynamics.extensions.util.AssertUtils;
@@ -9,10 +10,12 @@ import org.slf4j.LoggerFactory;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 import redis.clients.util.Slowlog;
+
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
+
 import static com.appdynamics.extensions.redis.utils.Constants.METRIC_SEPARATOR;
 
 public class SlowLogMetrics implements Runnable {
@@ -21,6 +24,7 @@ public class SlowLogMetrics implements Runnable {
     private Map<String, ?> metricsMap;
     private MonitorConfiguration configuration;
     private Map<String, String> server;
+    private MetricWriteHelper metricWriteHelper;
     private Map<String, String> metricPropertiesMap;
     private static final Logger logger = LoggerFactory.getLogger(SlowLogMetrics.class);
     private CountDownLatch countDownLatch;
@@ -29,25 +33,33 @@ public class SlowLogMetrics implements Runnable {
     private List<Map<String, ?>> slowLogMetricsList;
     private List<Metric> finalMetricList;
 
-    public SlowLogMetrics(MonitorConfiguration configuration, Map<String, String> server, JedisPool jedisPool, CountDownLatch countDownLatch, long previousTimeStamp, long currentTimeStamp){
+    public SlowLogMetrics(MonitorConfiguration configuration, Map<String, String> server, MetricWriteHelper metricWriteHelper, JedisPool jedisPool, CountDownLatch countDownLatch, long previousTimeStamp, long currentTimeStamp){
         this.configuration = configuration;
         this.server = server;
+        this.metricWriteHelper = metricWriteHelper;
         this.jedisPool = jedisPool;
         this.countDownLatch = countDownLatch;
         this.previousTimeStamp = previousTimeStamp / 1000L;
         this.currentTimeStamp = currentTimeStamp / 1000L;
-        metricsMap = (Map<String, ?>)configuration.getConfigYml().get("metrics");
-        AssertUtils.assertNotNull(metricsMap, "There is no 'metrics' section in config.yml");
-        slowLogMetricsList = (List<Map<String, ?>>)metricsMap.get("Slowlog");
-        AssertUtils.assertNotNull(slowLogMetricsList, "There is no 'Slowlog' metrics section under 'metrics' in config.yml");
     }
 
     public void run() {
-        extractSlowLogPropertiesMap(slowLogMetricsList);
-        finalMetricList = extractSlowLogMetricsList();
-        logger.debug("Printing SlowLog metrics for server {}", server.get("name"));
-        configuration.getMetricWriter().transformAndPrintNodeLevelMetrics(finalMetricList);
-        countDownLatch.countDown();
+        try {
+            metricsMap = (Map<String, ?>)configuration.getConfigYml().get("metrics");
+            AssertUtils.assertNotNull(metricsMap, "There is no 'metrics' section in config.yml");
+            slowLogMetricsList = (List<Map<String, ?>>)metricsMap.get("Slowlog");
+            AssertUtils.assertNotNull(slowLogMetricsList, "There is no 'Slowlog' metrics section under 'metrics' in config.yml");
+            extractSlowLogPropertiesMap(slowLogMetricsList);
+            finalMetricList = extractSlowLogMetricsList();
+            logger.debug("Printing SlowLog metrics for server {}", server.get("name"));
+            metricWriteHelper.transformAndPrintMetrics(finalMetricList);
+        }
+        catch(Exception e){
+
+        }
+        finally {
+            countDownLatch.countDown();
+        }
     }
 
     private void extractSlowLogPropertiesMap(List<Map<String, ?>> slowLogMetricsList) {

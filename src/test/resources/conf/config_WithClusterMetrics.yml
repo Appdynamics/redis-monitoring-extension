@@ -1,8 +1,8 @@
 #This will populate the metrics in all the tiers, under this path(not recommended)
-#metricPrefix: "Custom Metrics|Redis"
+#metricPrefix: "Custom metrics|Redis"
 
 #The following prefix will populate the metrics under one tier
-metricPrefix: "Server|Component:AppLevels|Custom Metrics|Redis"
+metricPrefix: "Server|Component:AppLevels|Custom metrics|Redis"
 
 #Add your list of Redis servers here.
 servers:
@@ -23,17 +23,6 @@ numberOfThreads: 20
 
 
 
-#                                      List of metrics
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-#Glossary of terms(These terms are used as properties for each metric):
-#   alias
-#   aggregation
-#   cluster
-#   delta
-#   isCluster
-#   multiplier
-#   time
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 metrics:
     Slowlog:
         - no_of_new_slow_logs:
