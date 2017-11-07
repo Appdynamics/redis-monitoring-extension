@@ -112,7 +112,7 @@ Configure the Redis monitoring extension by editing the config.yml file in `<MAC
      connection to the Redis server is successful.
 
 ## Version
-2.0.0  -  Revamped the extension to support new extensions framework(2.0.0), Added new metrics -> "no_of_new_slow_logs",  "connectionStatus"
+2.0.0  -  Revamped the extension to support new extensions framework(2.0.0), Added new metrics -> "no_of_new_slow_logs",  "connectionStatus".
 
 ## Troubleshooting
 Please follow the steps specified in the [TROUBLESHOOTING](https://community.appdynamics.com/t5/Knowledge-Base/How-to-troubleshoot-missing-custom-metrics-or-extensions-metrics/ta-p/28695) document to debug problems faced while using the extension.
