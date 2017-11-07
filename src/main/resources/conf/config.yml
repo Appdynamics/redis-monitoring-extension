@@ -16,7 +16,7 @@ encryptionKey: ""
 
 # Each server instance needs 3 threads, one for the server instance itself, one for info call to the Redis server and one for slowlog call to the server.
 # So, please change the value accordingly(Based on the number of server instances you are monitoring).
-numberOfThreads: 20
+numberOfThreads: 21
 
 #                                      List of metrics
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -109,7 +109,7 @@ metrics:
                 alias: "used_cpu_user_children"
 
 derivedMetrics:
-    - derivedMetricPath: "{x}|Stats|keyspace_ratio"
+    - derivedMetricPath: "{x}|Stats|keyspace_hit_ratio"
       formula: "{x}|Stats|keyspace_hits / ({x}|Stats|keyspace_hits + {x}|Stats|keyspace_misses)"
 
 
