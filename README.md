@@ -21,7 +21,7 @@ It is recommended that a single Redis monitoring extension be used to monitor mu
 Configure the Redis monitoring extension by editing the config.yml file in `<MACHINE_AGENT_HOME>/monitors/RedisMonitor/`
 
   1. Configure the "tier" under which the metrics need to be reported. This can be done by changing the value of `<TIER NAME OR TIER ID>` in
-     metricPrefix: "Server|Component:`<TIER NAME OR TIER ID>`|Custom Metrics|Redis"
+     metricPrefix: "Server|Component:`<TIER NAME OR TIER ID>`|Custom Metrics|Redis".
 
      For example,
      ```
@@ -55,7 +55,7 @@ Configure the Redis monitoring extension by editing the config.yml file in `<MAC
      encryptionKey: "axcdde43535hdhdgfiniyy576"
      ```
 
-  4. Configure the numberOfThreads(only if the number of Redis servers need to be monitored is greater than 7)
+  4. Configure the numberOfThreads(only if the number of Redis servers need to be monitored is greater than 7).
 
      For example,
      
@@ -64,7 +64,7 @@ Configure the Redis monitoring extension by editing the config.yml file in `<MAC
      numberOfThreads: 30
      ```
 
-  5. Configure the metrics section
+  5. Configure the metrics section.
 
      For configuring the metrics, the following properties can be used:
 
