@@ -58,6 +58,7 @@ Configure the Redis monitoring extension by editing the config.yml file in `<MAC
   4. Configure the numberOfThreads(only if the number of Redis servers need to be monitored is greater than 7)
 
      For example,
+     
      If number Redis servers that need to be monitored is 10, then number of threads required is 10 * 3 = 30
      ```
      numberOfThreads: 30
