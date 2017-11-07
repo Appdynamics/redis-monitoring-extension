@@ -14,6 +14,7 @@
         <execution-frequency-in-seconds>60</execution-frequency-in-seconds>
         <execution-timeout-in-secs>60</execution-timeout-in-secs>
         <task-arguments>
+            <!-- config file-->
             <argument name="config-file" is-required="true" default-value="monitors/RedisMonitor/config.yml" />
         </task-arguments>
         <java-task>
