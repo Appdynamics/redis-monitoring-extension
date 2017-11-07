@@ -1,23 +1,23 @@
 # AppDynamics Monitoring Extension for use with Redis
 
-##Use Case
+## Use Case
 Redis is an in memory key-value data store used as a database, cache and message broker. It supports data structures such as strings, hashes, lists, sets,
 sorted sets with range queries, bitmaps, hyperloglogs and geospatial indexes with radius queries.
 
 The Redis monitoring extension can monitor multiple Redis servers and display the statistics in AppDynamics Metric Browser.
 
-##Prerequisites
+## Prerequisites
 1. This extension works only with the standalone Java machine agent. The extension requires the machine agent to be up and running.
 2. This extension creates a java client to the Redis server that needs to be monitored. So the Redis server that has to be monitored, should be available
    for access from the machine that has the extension installed.
 
-##Installing the extension
+## Installing the extension
 1. Unzip the contents of "RedisMonitor.zip" as "RedisMonitor" and copy the "RedisMonitor" directory to `<MACHINE_AGENT_HOME>/monitors/`
 
-##Recommendations
+## Recommendations
 It is recommended that a single Redis monitoring extension be used to monitor multiple Redis servers belonging to a single cluster.
 
-##Configuring the extension using config.yml
+## Configuring the extension using config.yml
 Configure the Redis monitoring extension by editing the config.yml file in `<MACHINE_AGENT_HOME>/monitors/RedisMonitor/`
 
   1. Configure the "tier" under which the metrics need to be reported. This can be done by changing the value of "<TIER NAME OR TIER ID>" in
@@ -93,7 +93,7 @@ Configure the Redis monitoring extension by editing the config.yml file in `<MAC
      ```
      **All these metric properties are optional, and the default value shown in the table is applied to the metric(if a property has not been specified) by default.**
 
-##Metrics
+## Metrics
      This extension uses [INFO](http://redis.io/commands/info) command to fetch metrics from Redis server. Some of the metrics are listed below:
       * Clients: connected_clients, blocked_clients
       * Memory: used_memory, used_memory_rss, used_memory_peak, used_memory_lua, mem_fragmentation_ratio
@@ -110,15 +110,15 @@ Configure the Redis monitoring extension by editing the config.yml file in `<MAC
      In addition to the above metrics, there is a metric called "connectionStatus" with a value 0 when the connection to Redis server failed and 1 when the
      connection to the Redis server is successful.
 
-##Troubleshooting
+## Troubleshooting
 Please follow the steps specified in the [TROUBLESHOOTING](https://community.appdynamics.com/t5/Knowledge-Base/How-to-troubleshoot-missing-custom-metrics-or-extensions-metrics/ta-p/28695) document to debug problems faced while using the extension.
 
 ## Contributing
 Always feel free to fork and contribute any changes directly via [GitHub](https://github.com/Appdynamics/redis-monitoring-extension).
 
-##Community
+## Community
 Find out more in the [AppSphere](http://appsphere.appdynamics.com/t5/eXchange/Redis---Monitoring-Extension/idi-p/4505) community.
 
-##Support
+## Support
 For any questions or feature request, please contact [AppDynamics Support](mailto:help@appdynamics.com).
 
