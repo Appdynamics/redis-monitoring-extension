@@ -20,8 +20,8 @@ It is recommended that a single Redis monitoring extension be used to monitor mu
 ## Configuring the extension using config.yml
 Configure the Redis monitoring extension by editing the config.yml file in `<MACHINE_AGENT_HOME>/monitors/RedisMonitor/`
 
-  1. Configure the "tier" under which the metrics need to be reported. This can be done by changing the value of "<TIER NAME OR TIER ID>" in
-     metricPrefix: "Server|Component:<TIER NAME OR TIER ID>|Custom Metrics|Redis"
+  1. Configure the "tier" under which the metrics need to be reported. This can be done by changing the value of `<TIER NAME OR TIER ID>` in
+     metricPrefix: "Server|Component:`<TIER NAME OR TIER ID>`|Custom Metrics|Redis"
 
      For example,
      ```
