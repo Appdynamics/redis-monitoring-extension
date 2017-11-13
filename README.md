@@ -1,4 +1,4 @@
-# AppDynamics Monitoring Extension for use with Redis
+# Redis Monitoring Extension for AppDynamics
 
 ## Use Case
 Redis is an in memory key-value data store used as a database, cache and message broker. It supports data structures such as strings, hashes, lists, sets,
@@ -121,8 +121,7 @@ Please follow the steps specified in the [TROUBLESHOOTING](https://community.app
 Always feel free to fork and contribute any changes directly via [GitHub](https://github.com/Appdynamics/redis-monitoring-extension).
 
 ## Community
-Find out more in the [AppSphere](http://appsphere.appdynamics.com/t5/eXchange/Redis---Monitoring-Extension/idi-p/4505) community.
+Find out more in the [AppSphere](https://www.appdynamics.com/community/exchange/extension/redis-monitoring-extension/) community.
 
 ## Support
 For any questions or feature request, please contact [AppDynamics Support](mailto:help@appdynamics.com).
-
