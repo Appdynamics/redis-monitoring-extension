@@ -112,10 +112,12 @@ Configure the Redis monitoring extension by editing the config.yml file in `<MAC
      connection to the Redis server is successful.
 
 ## Version
-|---------------------|-------------|
-|Current version     |2.0.0
-|Redis version tested on   |3.9
-|Last Update         |11/07/2017
+
+|                          |           |      
+|--------------------------|-----------|
+|Current version           |2.0.0      |
+|Redis version tested on   |3.9        |
+|Last Update               |11/07/2017 |
 
 1.0.0 - Release version
 
