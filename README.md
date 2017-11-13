@@ -112,7 +112,28 @@ Configure the Redis monitoring extension by editing the config.yml file in `<MAC
      connection to the Redis server is successful.
 
 ## Version
-2.0.0  -  Revamped the extension to support new extensions framework(2.0.0), Added new metrics -> "no_of_new_slow_logs",  "connectionStatus"
+
+|Current version     |2.0.0
+|Redis version tested on   |3.9
+|Last Update         |11/07/2017
+
+1.0.0 - Release version
+
+1.0.1 - Code Optimization. 
+
+1.0.2 - Support for role metrics
+
+1.0.3 - Revamped and Added more metrics. 
+
+1.0.4 - JDK 1.6 compatible
+
+1.0.5 - Added commandstats and keyspace_hit_ratio
+
+1.0.6 - Added code fixes
+
+1.0.7 - Fix for includePatterns
+
+2.0.0 - Revamped the extension to support new extensions framework(2.0.0), Added new metrics like "no_of_new_slow_logs", "connectionStatus
 
 ## Troubleshooting
 Please follow the steps specified in the [TROUBLESHOOTING](https://community.appdynamics.com/t5/Knowledge-Base/How-to-troubleshoot-missing-custom-metrics-or-extensions-metrics/ta-p/28695) document to debug problems faced while using the extension.
