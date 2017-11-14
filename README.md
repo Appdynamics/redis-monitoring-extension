@@ -150,9 +150,9 @@ This starts an http server at http://host:9090/. This can be accessed from the b
 
 2. If the server is not accessible from outside/browser, you can use the following end points to see the list of registered metrics and errors.
 
-    #Get the stats
+    Get the stats:
     curl http://localhost:9090/api/stats
-    #Get the registered metrics
+    Get the registered metrics:
     curl http://localhost:9090/api/metric-paths
 You can make the changes to config.yml and validate it from the browser or the API
 
