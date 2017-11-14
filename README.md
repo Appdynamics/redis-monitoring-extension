@@ -137,6 +137,27 @@ Configure the Redis monitoring extension by editing the config.yml file in `<MAC
 
 2.0.0 - Revamped the extension to support new extensions framework(2.0.0), Added new metrics like "no_of_new_slow_logs", "connectionStatus
 
+## Workbench
+Workbench is a feature by which you can preview the metrics before registering it with the controller. This is useful if you want to fine tune the configurations. Workbench is embedded into the extension jar.
+To use the workbench, follow all the steps in installation and configuration.
+
+1. Start the workbench with the following command if you are in &lt;MACHINE_AGENT_HOME&gt;
+
+```
+      java -jar /monitors/RedisMonitor/redis-monitoring-extension.jar 
+```      
+This starts an http server at http://host:9090/. This can be accessed from the browser.
+
+2. If the server is not accessible from outside/browser, you can use the following end points to see the list of registered metrics and errors.
+
+    #Get the stats
+    curl http://localhost:9090/api/stats
+    #Get the registered metrics
+    curl http://localhost:9090/api/metric-paths
+You can make the changes to config.yml and validate it from the browser or the API
+
+3. Once the configuration is complete, you can kill the workbench and start the Machine Agent.
+
 ## Troubleshooting
 Please follow the steps specified in the [TROUBLESHOOTING](https://community.appdynamics.com/t5/Knowledge-Base/How-to-troubleshoot-missing-custom-metrics-or-extensions-metrics/ta-p/28695) document to debug problems faced while using the extension.
 
