@@ -151,9 +151,13 @@ This starts an http server at http://host:9090/. This can be accessed from the b
 2. If the server is not accessible from outside/browser, you can use the following end points to see the list of registered metrics and errors.
 
     Get the stats:
+    ```
     curl http://localhost:9090/api/stats
+    ```
     Get the registered metrics:
+    ```
     curl http://localhost:9090/api/metric-paths
+    ```
 You can make the changes to config.yml and validate it from the browser or the API
 
 3. Once the configuration is complete, you can kill the workbench and start the Machine Agent.
