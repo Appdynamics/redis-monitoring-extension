@@ -93,6 +93,19 @@ Configure the Redis monitoring extension by editing the config.yml file in `<MAC
            slave: 0
      ```
      **All these metric properties are optional, and the default value shown in the table is applied to the metric(if a property has not been specified) by default.**
+     
+## Password encryption
+To avoid setting the clear text password in the config.yml, please follow the steps below to encrypt the password and set the encrypted password and the key in the config.yml:
+1. Download the util jar to encrypt the password from [here](https://github.com/Appdynamics/maven-repo/raw/master/releases/com/appdynamics/appd-exts-commons/2.0.0/appd-exts-commons-2.0.0.jar).
+2. Encrypt password from the command line using the following command :
+   ```
+   java -cp "appd-exts-commons-2.0.0.jar" com.appdynamics.extensions.crypto.Encryptor myKey myPassword
+   ```
+   where "myKey" is any random key,
+         "myPassword" is the actual password that needs to be encrypted
+3. Add the values for "encryptionKey", "encryptedPassword" in the config.yml. 
+   The value for "encryptionKey" is the value substituted for "myKey" in the above command.
+   The value for "encryptedPassword" is the result of the above command.     
 
 ## Metrics
      This extension uses [INFO](http://redis.io/commands/info) command to fetch metrics from Redis server. Some of the metrics are listed below:
