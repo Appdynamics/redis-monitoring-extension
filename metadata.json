@@ -1,0 +1,20 @@
+{
+	"id" : "redis-monitor",
+	"type" : "monitor",
+	"displayName" : "Redis Monitoring Extension",
+	"description" : "An AppDynamics extension to be used with a stand alone Java machine agent to provide metrics for Redis servers.",
+	"version" : "2.0.0",
+	"downloadLink" : "https://github.com/Appdynamics/cassandra-monitoring-extension/releases/download/cassandra-monitoring-extension-1.6.0/CassandraMonitor.zip",
+	"imageLink" : "https:///www.appdynamics.com/media/uploaded-images/1510098508/.thumbnails/redis-logo-stack-52x0.png",
+	"configs" : [
+		{
+			"name" : "monitor.xml",
+			"link" : "https://raw.githubusercontent.com/Appdynamics/cassandra-monitoring-extension/master/src/main/resources/conf/monitor.xml"
+		},
+		{
+			"name" : "config.yml",
+			"link" : "https://raw.githubusercontent.com/Appdynamics/cassandra-monitoring-extension/master/src/main/resources/conf/config.yml"
+		}
+	]
+
+}
