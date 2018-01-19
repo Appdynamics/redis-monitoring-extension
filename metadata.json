@@ -4,7 +4,7 @@
 	"displayName" : "Redis Monitoring Extension",
 	"description" : "An AppDynamics extension to be used with a stand alone Java machine agent to provide metrics for Redis servers.",
 	"version" : "2.0.0",
-	"downloadLink" : "https://github.com/Appdynamics/redis-monitoring-extension/releases/download/v1.0.4/RedisMonitor-1.0.4.zip",
+	"downloadLink" : "https://github.com/Appdynamics/redis-monitoring-extension/releases/download/v2.0.0/RedisMonitor-2.0.0.zip",
 	"imageLink" : "https:///www.appdynamics.com/media/uploaded-images/1510098508/.thumbnails/redis-logo-stack-52x0.png",
 	"configs" : [
 		{
