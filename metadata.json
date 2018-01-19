@@ -9,11 +9,11 @@
 	"configs" : [
 		{
 			"name" : "monitor.xml",
-			"link" : "https://raw.githubusercontent.com/Appdynamics/cassandra-monitoring-extension/master/src/main/resources/conf/monitor.xml"
+			"link" : "https://raw.githubusercontent.com/Appdynamics/redis-monitoring-extension/master/src/main/resources/conf/monitor.xml"
 		},
 		{
 			"name" : "config.yml",
-			"link" : "https://raw.githubusercontent.com/Appdynamics/cassandra-monitoring-extension/master/src/main/resources/conf/config.yml"
+			"link" : "https://raw.githubusercontent.com/Appdynamics/redis-monitoring-extension/master/src/main/resources/conf/config.yml"
 		}
 	]
 
