@@ -1,6 +1,5 @@
-/**
- * Copyright 2017 AppDynamics, Inc.
- *
+/*
+ * Copyright (c) 2018 AppDynamics,Inc.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,10 +16,12 @@ package com.appdynamics.extensions.redis;
 
 import com.appdynamics.extensions.ABaseMonitor;
 import com.appdynamics.extensions.TasksExecutionServiceProvider;
+import com.appdynamics.extensions.conf.MonitorConfiguration;
 import com.appdynamics.extensions.util.AssertUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
 import java.util.List;
 import java.util.Map;
 
@@ -40,6 +41,27 @@ public class RedisMonitor extends ABaseMonitor {
     @Override
     public String getMonitorName() {
         return "Redis Monitor";
+    }
+
+    @Override
+    protected void initialize(Map<String, String> args) {
+        if(configuration == null){
+            monitorJob = createMonitorJob();
+            MonitorConfiguration conf = new MonitorConfiguration(monitorName,getDefaultMetricPrefix(), monitorJob);
+            conf.setConfigYml(args.get("config-file"), getFileWatchListener(), null);
+            initializeMoreStuff(conf);
+            this.configuration = conf;
+        }
+    }
+
+
+    private MonitorConfiguration.FileWatchListener getFileWatchListener(){
+        return new MonitorConfiguration.FileWatchListener(){
+            @Override
+            public void onFileChange(File file) {
+
+            }
+        };
     }
 
     @Override
