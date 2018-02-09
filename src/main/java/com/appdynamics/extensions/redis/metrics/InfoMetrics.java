@@ -97,14 +97,29 @@ public class InfoMetrics implements Runnable {
     private List<Metric> extractMetricsList(){
         List<Metric> finalMetricList = Lists.newArrayList();
         InfoMapExtractor infoMapExtractor = new InfoMapExtractor();
+        Map<String, String> sectionInfoMap;
         String metricPrefix = configuration.getMetricPrefix() + METRIC_SEPARATOR + server.get("name");
         for(Map.Entry entry : infoMap.entrySet()) {
             String sectionName = entry.getKey().toString();
+            if(sectionName.equalsIgnoreCase("commandstats")){
+                String infoCommandStats = getCommandStatsInfo();
+                sectionInfoMap = infoMapExtractor.extractInfoAsHashMap(infoCommandStats, sectionName);
+            }else {
+                 sectionInfoMap = infoMapExtractor.extractInfoAsHashMap(info, sectionName);
+            }
+
             List<Map<String, ?>> metricsInSectionConfig = (List<Map<String,?>>) entry.getValue();
-            Map<String, String> sectionInfoMap = infoMapExtractor.extractInfoAsHashMap(info, sectionName);
             CommonMetricsModifier commonMetricsModifier = new CommonMetricsModifier(metricsInSectionConfig, sectionInfoMap, metricPrefix, sectionName);
             finalMetricList.addAll(commonMetricsModifier.metricBuilder());
         }
         return finalMetricList;
+    }
+
+    private String getCommandStatsInfo(){
+        String info;
+        try(Jedis jedis = jedisPool.getResource()) {
+            info = jedis.info("commandstats");
+        }
+        return info;
     }
 }
