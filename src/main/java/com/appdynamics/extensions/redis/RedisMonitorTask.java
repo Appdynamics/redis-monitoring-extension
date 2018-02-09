@@ -54,13 +54,14 @@ class RedisMonitorTask implements AMonitorTaskRunnable {
         String host = server.get("host");
         String port = server.get("port");
         String name = server.get("name");
+        String ssl = server.get("sslEnabled");
         if(!Strings.isNullOrEmpty(host) && !Strings.isNullOrEmpty(port) && !Strings.isNullOrEmpty(name)) {
             int portNumber = Integer.parseInt(port);
             String password = getPassword(server);
             JedisPoolConfig jedisPoolConfig = buildJedisPoolConfig();
             if (password.trim().length() != 0) {
                 try {
-                    jedisPool = new JedisPool(jedisPoolConfig, host, portNumber, 2000, password);
+                    jedisPool = new JedisPool(jedisPoolConfig, host, portNumber, 2000, password, Boolean.valueOf(ssl));
 
                 }
                 catch (Exception e) {
@@ -69,7 +70,7 @@ class RedisMonitorTask implements AMonitorTaskRunnable {
             }
             else {
                 try {
-                    jedisPool = new JedisPool(jedisPoolConfig, host, portNumber);
+                    jedisPool = new JedisPool(jedisPoolConfig, host, portNumber, Boolean.valueOf(ssl));
                 }
                 catch (Exception e) {
                     logger.error("Exception while creating JedisPool" + e);

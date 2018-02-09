@@ -1,0 +1,40 @@
+#This will populate the metrics in all the tiers, under this path(not recommended)
+#metricPrefix: "Custom metrics|Redis"
+
+#The following prefix will populate the metrics under one tier
+metricPrefix: "Server|Component:AppLevels|Custom metrics|Redis"
+
+#Add your list of Redis servers here.
+servers:
+  - name: "Server1"
+    host: "localhost"
+    port: "6379"
+    sslEnabled: "false"
+    password: ""
+
+
+
+# Each server instance needs 3 threads, one for the server instance itself, one for info.txt call to the Redis server and one for slowlog.txt call to the server.
+# So, please change the value accordingly(Based on the number of server instances you are monitoring).
+numberOfThreads: 20
+
+
+
+metrics:
+    Slowlog:
+        - no_of_new_slow_logs:
+            alias: "no_of_new_slow_logs"
+            multiplier: ""
+            aggregateAtCluster: "true"
+
+    Info:
+        Commandstats:
+            - cmdstat_info:
+                alis : "cmdstat_info"
+            - cmdstat_command:
+                alias: "cmdstat_command"
+
+
+
+
+

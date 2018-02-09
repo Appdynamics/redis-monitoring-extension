@@ -16,7 +16,9 @@
 package com.appdynamics.extensions.redis.utils;
 
 import com.google.common.base.Splitter;
+import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Multimap;
 
 import java.util.Map;
 
@@ -32,6 +34,28 @@ public class InfoMapExtractor {
                 continue;
             }
             return sectionMapGenerator(section, sectionName);
+        }
+        return infoMap;
+    }
+
+    public Multimap<String, String> extractInfoAsMultiMap(String info, String sectionName){
+        Multimap<String, String> infoMap = HashMultimap.create();
+        Splitter lineSplitter = Splitter.on(System.getProperty("line.separator"))
+                .omitEmptyStrings()
+                .trimResults();
+        Splitter commaSplitter = Splitter.on(",")
+                .omitEmptyStrings()
+                .trimResults();
+        for(String metric : lineSplitter.split(info)){
+            if(metric.contains(sectionName)){
+                continue;
+            }
+            String infoLine[] = metric.split(":");
+            String metricname = infoLine[0];
+            for(String submetric : commaSplitter.split(infoLine[1])){
+                infoMap.put(metricname, submetric);
+            }
+
         }
         return infoMap;
     }

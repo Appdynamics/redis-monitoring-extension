@@ -22,6 +22,7 @@ import com.appdynamics.extensions.metrics.Metric;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import org.apache.commons.io.FileUtils;
+import org.junit.Assert;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import redis.clients.jedis.Jedis;
@@ -92,6 +93,41 @@ public class InfoMetricsTest {
         for (Metric metric : (List<Metric>)pathCaptor.getValue()){
             org.junit.Assert.assertTrue(metricPathsList.contains(metric.getMetricPath()));
         }
+
+    }
+
+    @Test
+    public void infoMetricsWithCommandStatsTest() throws IOException{
+        ArgumentCaptor<List> pathCaptor = ArgumentCaptor.forClass(List.class);
+        AMonitorJob aMonitorJob = mock(AMonitorJob.class);
+        MonitorConfiguration monitorConfiguration = new MonitorConfiguration("Redis Monitor", "Custom Metrics|Redis|", aMonitorJob);
+        monitorConfiguration.setConfigYml("src/test/resources/conf/config_WithCommandStats.yml");
+        MetricWriteHelper metricWriteHelper = mock(MetricWriteHelper.class);
+        JedisPool jedisPool = mock(JedisPool.class);
+        Jedis jedis = mock(Jedis.class);
+        CountDownLatch countDownLatch = new CountDownLatch(1);
+        when(jedisPool.getResource()).thenReturn(jedis);
+        String info = FileUtils.readFileToString(new File("src/test/resources/info3.txt"));
+        when(jedis.info(anyString())).thenReturn(info);
+        Map<String, String> server = Maps.newHashMap();
+        server.put("host", "localhost");
+        server.put("port", "6379");
+        server.put("name", "Server1");
+        InfoMetrics redisMetrics = new InfoMetrics(monitorConfiguration, server, metricWriteHelper,jedisPool, countDownLatch);
+        redisMetrics.run();
+        verify(metricWriteHelper).transformAndPrintMetrics(pathCaptor.capture());
+        List<String> metricPathsList = Lists.newArrayList();
+        metricPathsList.add("Server|Component:AppLevels|Custom metrics|Redis|Server1|Commandstats|cmdstat_info|calls");
+        metricPathsList.add("Server|Component:AppLevels|Custom metrics|Redis|Server1|Commandstats|cmdstat_info|usec");
+        metricPathsList.add("Server|Component:AppLevels|Custom metrics|Redis|Server1|Commandstats|cmdstat_info|usec_per_call");
+        metricPathsList.add("Server|Component:AppLevels|Custom metrics|Redis|Server1|Commandstats|cmdstat_command|calls");
+        metricPathsList.add("Server|Component:AppLevels|Custom metrics|Redis|Server1|Commandstats|cmdstat_command|usec");
+        metricPathsList.add("Server|Component:AppLevels|Custom metrics|Redis|Server1|Commandstats|cmdstat_command|usec_per_call");
+        for (Metric metric : (List<Metric>)pathCaptor.getValue()){
+            org.junit.Assert.assertTrue(metricPathsList.contains(metric.getMetricPath()));
+        }
+
+        Assert.assertTrue(pathCaptor.getValue().size() == 6);
 
     }
 

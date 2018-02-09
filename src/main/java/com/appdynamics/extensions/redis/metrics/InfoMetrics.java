@@ -21,6 +21,7 @@ import com.appdynamics.extensions.metrics.Metric;
 import com.appdynamics.extensions.redis.utils.InfoMapExtractor;
 import com.appdynamics.extensions.util.AssertUtils;
 import com.google.common.collect.Lists;
+import com.google.common.collect.Multimap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import redis.clients.jedis.Jedis;
@@ -101,25 +102,22 @@ public class InfoMetrics implements Runnable {
         String metricPrefix = configuration.getMetricPrefix() + METRIC_SEPARATOR + server.get("name");
         for(Map.Entry entry : infoMap.entrySet()) {
             String sectionName = entry.getKey().toString();
-            if(sectionName.equalsIgnoreCase("commandstats")){
-                String infoCommandStats = getCommandStatsInfo();
-                sectionInfoMap = infoMapExtractor.extractInfoAsHashMap(infoCommandStats, sectionName);
+            List<Map<String, ?>> metricsInSectionConfig = (List<Map<String,?>>) entry.getValue();
+
+            if(sectionName.equalsIgnoreCase("Commandstats")){
+                DynamicMetricsModifier dynamicMetricsModifier = new DynamicMetricsModifier(jedisPool, metricPrefix, sectionName, metricsInSectionConfig);
+                finalMetricList.addAll(dynamicMetricsModifier.getMetricsList());
             }else {
-                 sectionInfoMap = infoMapExtractor.extractInfoAsHashMap(info, sectionName);
+                sectionInfoMap = infoMapExtractor.extractInfoAsHashMap(info, sectionName);
+
+                CommonMetricsModifier commonMetricsModifier = new CommonMetricsModifier(metricsInSectionConfig, sectionInfoMap, metricPrefix, sectionName);
+                finalMetricList.addAll(commonMetricsModifier.metricBuilder());
             }
 
-            List<Map<String, ?>> metricsInSectionConfig = (List<Map<String,?>>) entry.getValue();
-            CommonMetricsModifier commonMetricsModifier = new CommonMetricsModifier(metricsInSectionConfig, sectionInfoMap, metricPrefix, sectionName);
-            finalMetricList.addAll(commonMetricsModifier.metricBuilder());
+
         }
         return finalMetricList;
     }
 
-    private String getCommandStatsInfo(){
-        String info;
-        try(Jedis jedis = jedisPool.getResource()) {
-            info = jedis.info("commandstats");
-        }
-        return info;
-    }
+
 }
