@@ -28,7 +28,7 @@ Configure the Redis monitoring extension by editing the config.yml file in `<MAC
      metricPrefix: "Server|Component:Extensions tier|Custom Metrics|Redis"
      ```
 
-  2. Configure the Redis instances by specifying the name(required), host(required), port(required) of the Redis instance, password (only if authentication enabled),
+  2. Configure the Redis instances by specifying the name(required), host(required), port(required), sslEnabled(required) of the Redis instance, password (only if authentication enabled),
      encryptedPassword(only if password encryption required).
 
      For example,
@@ -39,11 +39,13 @@ Configure the Redis monitoring extension by editing the config.yml file in `<MAC
           host: "localhost"
           port: "6379"
           password: ""
+          sslEnabled: "false"
           encryptedPassword: ""
         - name: "Server2"
           host: "localhost"
           port: "6380"
           password: ""
+          sslEnabled: "false"
           encryptedPassword: ""
      ```
 
@@ -115,6 +117,7 @@ To avoid setting the clear text password in the config.yml, please follow the st
       * Persistence: rdb_changes_since_last_save, aof_last_rewrite_time_sec
       * replication: role (MASTER:1, SLAVE:0), connected_slaves
       * CPU: used_cpu_sys, used_cpu_user, used_cpu_sys_children, used_cpu_user_children
+      * Commandstats: cmdstat_info
 
      This extension also uses [SLOWLOG](https://redis.io/commands/slowlog) to fetch metrics from Redis server.
       * no_of_new_slow_logs -> This metric represents the number of new logs that were recorded as slowlogs(log queries that exceeded a specified
@@ -174,6 +177,8 @@ You can make the changes to config.yml and validate it from the browser or the A
 1.0.7 - Fix for includePatterns
 
 2.0.0 - Revamped the extension to support new extensions framework(2.0.0), Added new metrics like "no_of_new_slow_logs", "connectionStatus
+
+2.0.1 - Added license, updated to extensions framework 2.0.2, SSL support, "Commandstats" metrics
 
 ## Troubleshooting
 Please follow the steps specified in the [TROUBLESHOOTING](https://community.appdynamics.com/t5/Knowledge-Base/How-to-troubleshoot-missing-custom-metrics-or-extensions-metrics/ta-p/28695) document to debug problems faced while using the extension.

@@ -109,6 +109,10 @@ metrics:
             - used_cpu_user_children: #User CPU consumed by the background processes
                 alias: "used_cpu_user_children"
 
+        Commandstats: #Provides statistics based on the command type, including the number of calls, the total CPU time consumed by these commands, and the average CPU consumed per command execution.
+            - cmdstat_info:
+                alias: "cmdstat_info"
+
 derivedMetrics:
     - derivedMetricPath: "{x}|Stats|keyspace_hit_ratio"
       formula: "{x}|Stats|keyspace_hits / ({x}|Stats|keyspace_hits + {x}|Stats|keyspace_misses)"
