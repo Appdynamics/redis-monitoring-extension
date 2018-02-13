@@ -156,9 +156,9 @@ You can make the changes to config.yml and validate it from the browser or the A
 
 |                          |           |      
 |--------------------------|-----------|
-|Current version           |2.0.0      |
+|Current version           |2.0.1      |
 |Redis version tested on   |3.9        |
-|Last Update               |11/07/2017 |
+|Last Update               |02/13/2018 |
 
 1.0.0 - Release version
 
@@ -178,7 +178,7 @@ You can make the changes to config.yml and validate it from the browser or the A
 
 2.0.0 - Revamped the extension to support new extensions framework(2.0.0), Added new metrics like "no_of_new_slow_logs", "connectionStatus
 
-2.0.1 - Added license, updated to extensions framework 2.0.2, SSL support, "Commandstats" metrics
+2.0.1 - Added license, updated to extensions framework 2.0.2, added SSL support, added "Commandstats" metrics
 
 ## Troubleshooting
 Please follow the steps specified in the [TROUBLESHOOTING](https://community.appdynamics.com/t5/Knowledge-Base/How-to-troubleshoot-missing-custom-metrics-or-extensions-metrics/ta-p/28695) document to debug problems faced while using the extension.
