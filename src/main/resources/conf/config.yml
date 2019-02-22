@@ -1,5 +1,5 @@
 #This will populate the metrics in all the tiers, under this path(not recommended)
-#metricPrefix: "Custom metrics|Redis"
+#metricPrefix: "Custom Metrics|Redis"
 #The following prefix will populate the metrics under one tier
 metricPrefix: "Server|Component:<TIER NAME OR TIER ID>|Custom Metrics|Redis"
 
