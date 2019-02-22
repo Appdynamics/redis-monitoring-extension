@@ -1,6 +1,6 @@
 # Redis Monitoring Extension
 
-## 2.0.2 - Feb 22, 2018
+## 2.0.2 - Feb 22, 2019
 1. Fixed the documentation bug in config.yml.
 
 ## 2.0.1 - Mar 29, 2018
