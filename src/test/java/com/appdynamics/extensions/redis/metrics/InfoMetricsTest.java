@@ -9,7 +9,7 @@ package com.appdynamics.extensions.redis.metrics;
 
 import com.appdynamics.extensions.AMonitorJob;
 import com.appdynamics.extensions.MetricWriteHelper;
-import com.appdynamics.extensions.conf.MonitorConfiguration;
+import com.appdynamics.extensions.conf.MonitorContextConfiguration;
 import com.appdynamics.extensions.metrics.Metric;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -35,7 +35,8 @@ public class InfoMetricsTest {
     public void infoMetricsTest() throws IOException{
         ArgumentCaptor<List> pathCaptor = ArgumentCaptor.forClass(List.class);
         AMonitorJob aMonitorJob = mock(AMonitorJob.class);
-        MonitorConfiguration monitorConfiguration = new MonitorConfiguration("Redis Monitor", "Custom Metrics|Redis|", aMonitorJob);
+        //#TODO Refactor the unit test
+        MonitorContextConfiguration monitorConfiguration = new MonitorContextConfiguration("Redis Monitor", "Custom Metrics|Redis|", null, aMonitorJob);
         monitorConfiguration.setConfigYml("src/test/resources/conf/config.yml");
         MetricWriteHelper metricWriteHelper = mock(MetricWriteHelper.class);
         JedisPool jedisPool = mock(JedisPool.class);

@@ -8,7 +8,7 @@
 package com.appdynamics.extensions.redis.metrics;
 
 import com.appdynamics.extensions.MetricWriteHelper;
-import com.appdynamics.extensions.conf.MonitorConfiguration;
+import com.appdynamics.extensions.conf.MonitorContextConfiguration;
 import com.appdynamics.extensions.metrics.Metric;
 import com.appdynamics.extensions.redis.utils.InfoMapExtractor;
 import com.appdynamics.extensions.util.AssertUtils;
@@ -31,13 +31,13 @@ public class InfoMetrics implements Runnable {
     private Map<String, ?> metricsMap;
     private Map<String, ?> infoMap;
     private List<Metric> finalMetricList;
-    private MonitorConfiguration configuration;
-    private Map<String, String> server;
+    private MonitorContextConfiguration configuration;
+    private Map<String, ?> server;
     private MetricWriteHelper metricWriteHelper;
     private static final Logger logger = LoggerFactory.getLogger(InfoMetrics.class);
     private CountDownLatch countDownLatch;
 
-    public InfoMetrics(MonitorConfiguration configuration, Map<String, String> server, MetricWriteHelper metricWriteHelper, JedisPool jedisPool, CountDownLatch countDownLatch) {
+    public InfoMetrics(MonitorContextConfiguration configuration, Map<String, ?> server, MetricWriteHelper metricWriteHelper, JedisPool jedisPool, CountDownLatch countDownLatch) {
         this.configuration = configuration;
         this.server = server;
         this.metricWriteHelper = metricWriteHelper;

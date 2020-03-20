@@ -8,7 +8,7 @@
 package com.appdynamics.extensions.redis.metrics;
 
 import com.appdynamics.extensions.MetricWriteHelper;
-import com.appdynamics.extensions.conf.MonitorConfiguration;
+import com.appdynamics.extensions.conf.MonitorContextConfiguration;
 import com.appdynamics.extensions.metrics.Metric;
 import com.appdynamics.extensions.util.AssertUtils;
 import com.google.common.collect.Lists;
@@ -29,8 +29,8 @@ public class SlowLogMetrics implements Runnable {
 
     private JedisPool jedisPool;
     private Map<String, ?> metricsMap;
-    private MonitorConfiguration configuration;
-    private Map<String, String> server;
+    private MonitorContextConfiguration configuration;
+    private Map<String, ?> server;
     private MetricWriteHelper metricWriteHelper;
     private Map<String, String> metricPropertiesMap;
     private static final Logger logger = LoggerFactory.getLogger(SlowLogMetrics.class);
@@ -40,7 +40,7 @@ public class SlowLogMetrics implements Runnable {
     private List<Map<String, ?>> slowLogMetricsList;
     private List<Metric> finalMetricList;
 
-    public SlowLogMetrics(MonitorConfiguration configuration, Map<String, String> server, MetricWriteHelper metricWriteHelper, JedisPool jedisPool, CountDownLatch countDownLatch, long previousTimeStamp, long currentTimeStamp){
+    public SlowLogMetrics(MonitorContextConfiguration configuration, Map<String, ?> server, MetricWriteHelper metricWriteHelper, JedisPool jedisPool, CountDownLatch countDownLatch, long previousTimeStamp, long currentTimeStamp){
         this.configuration = configuration;
         this.server = server;
         this.metricWriteHelper = metricWriteHelper;

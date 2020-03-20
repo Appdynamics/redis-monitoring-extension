@@ -16,7 +16,7 @@
 package com.appdynamics.extensions.redis;
 
 import com.appdynamics.extensions.MetricWriteHelper;
-import com.appdynamics.extensions.conf.MonitorConfiguration;
+import com.appdynamics.extensions.conf.MonitorContextConfiguration;
 import com.appdynamics.extensions.redis.metrics.InfoMetrics;
 import com.appdynamics.extensions.redis.metrics.SlowLogMetrics;
 import org.slf4j.Logger;
@@ -28,8 +28,8 @@ import java.util.concurrent.CountDownLatch;
 
 class RedisCommandHandler {
 
-    private MonitorConfiguration configuration;
-    private Map<String, String> server;
+    private MonitorContextConfiguration monitorContextConfiguration;
+    private Map<String, ?> server;
     private MetricWriteHelper metricWriteHelper;
     private JedisPool jedisPool;
     private Logger logger = LoggerFactory.getLogger(RedisCommandHandler.class);
@@ -37,8 +37,8 @@ class RedisCommandHandler {
     private long previousTimeStamp;
     private long currentTimeStamp;
 
-    RedisCommandHandler(MonitorConfiguration configuration, Map<String, String> server, MetricWriteHelper metricWriteHelper, JedisPool jedisPool, long previousTimeStamp, long currentTimeStamp) {
-        this.configuration = configuration;
+    RedisCommandHandler(MonitorContextConfiguration monitorContextConfiguration, Map<String, ?> server, MetricWriteHelper metricWriteHelper, JedisPool jedisPool, long previousTimeStamp, long currentTimeStamp) {
+        this.monitorContextConfiguration = monitorContextConfiguration;
         this.server = server;
         this.metricWriteHelper = metricWriteHelper;
         this.jedisPool = jedisPool;
@@ -48,10 +48,10 @@ class RedisCommandHandler {
     }
 
      void triggerCommandsToRedisServer() {
-        SlowLogMetrics slowLogMetricsTask = new SlowLogMetrics(configuration, server, metricWriteHelper, jedisPool, countDownLatch, previousTimeStamp, currentTimeStamp);
-        configuration.getExecutorService().execute("SlowLogMetricsTask",slowLogMetricsTask);
-        InfoMetrics infoMetricsTask = new InfoMetrics(configuration, server, metricWriteHelper, jedisPool, countDownLatch);
-        configuration.getExecutorService().execute("InfoMetricsTask", infoMetricsTask);
+        SlowLogMetrics slowLogMetricsTask = new SlowLogMetrics(monitorContextConfiguration, server, metricWriteHelper, jedisPool, countDownLatch, previousTimeStamp, currentTimeStamp);
+        monitorContextConfiguration.getContext().getExecutorService().execute("SlowLogMetricsTask",slowLogMetricsTask);
+        InfoMetrics infoMetricsTask = new InfoMetrics(monitorContextConfiguration, server, metricWriteHelper, jedisPool, countDownLatch);
+        monitorContextConfiguration.getContext().getExecutorService().execute("InfoMetricsTask", infoMetricsTask);
         try{
             countDownLatch.await();
         }
