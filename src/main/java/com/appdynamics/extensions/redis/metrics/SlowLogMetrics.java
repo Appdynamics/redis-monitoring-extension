@@ -62,7 +62,7 @@ public class SlowLogMetrics implements Runnable {
             metricWriteHelper.transformAndPrintMetrics(finalMetricList);
         }
         catch(Exception e){
-
+            logger.error("Error while collecting and printing info metrics", e);
         }
         finally {
             countDownLatch.countDown();

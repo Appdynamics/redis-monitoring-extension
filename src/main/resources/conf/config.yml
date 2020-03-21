@@ -10,6 +10,26 @@ servers:
     port: "6379"
     password: ""
     encryptedPassword: ""
+    useSSL: false
+
+#The following connection section is not mandatory. It needs to be used only when useSSL is true and
+#using custom truststore and keystore.
+connection:
+    socketTimeout: 5000 # Read Timeout
+    connectTimeout: 5000 # Connection Timeout
+
+
+    sslVerifyHostname: true
+    sslProtocols: ["TLS"] # If customizing, add only one value by replacing "TLS". By default TLSv1, TLSv1.1, TLSv1.2 are supported.
+
+    sslTrustStorePath: "" # If not set, will set value from "-Dappdynamics.agent.monitors.truststore.path=/path/cacerts" if present, else will set value as <MachineAgentHome>/conf/extensions-cacerts.jks.
+    sslTrustStorePassword: "" # If not set, will set value from "-Dappdynamics.agent.monitors.truststore.password=password".
+    sslTrustStoreEncryptedPassword: "" ## If not set, will set value from "-Dappdynamics.agent.monitors.truststore.encryptedPassword=ghrr121fgk23-2636guu".
+
+    #The following are only required when mutual auth is enabled. Else they can be ignored.
+    sslKeyStorePath: "" # If not set, will set value from "-Dappdynamics.agent.monitors.keystore.path=/path/clientcerts" if present, else will set value as <MachineAgentHome>/conf/extensions-clientcerts.jks.
+    sslKeyStorePassword: "" # If not set, will set value from "-Dappdynamics.agent.monitors.keystore.password=password".
+    sslKeyStoreEncryptedPassword: "" # If not set, will set value from "-Dappdynamics.agent.monitors.keystore.encryptedPassword=ghrr121fgk23-2636guu".
 
 #Encryption key for Encrypted password.
 encryptionKey: ""

@@ -56,7 +56,7 @@ class RedisCommandHandler {
             countDownLatch.await();
         }
         catch(InterruptedException e){
-            logger.error(e.toString());
+            logger.error("Issue in the RedisCommandHandler", e);
         }
         finally {
             jedisPool.destroy();

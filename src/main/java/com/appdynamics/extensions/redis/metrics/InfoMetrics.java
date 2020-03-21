@@ -58,7 +58,7 @@ public class InfoMetrics implements Runnable {
             metricWriteHelper.transformAndPrintMetrics(finalMetricList);
         }
         catch(Exception e){
-            logger.error(e.getMessage());
+            logger.error("Error while collecting and printing info metrics", e);
         }
         finally {
             countDownLatch.countDown();
