@@ -104,8 +104,6 @@ class RedisMonitorTask implements AMonitorTaskRunnable {
 
     @Override
     public void onTaskComplete() {
-
-
     }
 }
 

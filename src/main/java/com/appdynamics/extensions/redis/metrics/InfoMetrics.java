@@ -66,13 +66,13 @@ public class InfoMetrics implements Runnable {
     }
 
     private String extractInfo(){
-        int connectionStatus = 0;
+        int heartbeat = 0;
         String infoFromRedis = null;
         Jedis jedis = null;
         try{
             jedis = jedisPool.getResource();
             infoFromRedis = jedis.info();
-            connectionStatus = 1;
+            heartbeat = 1;
         }
         catch(Exception e){
             logger.error(e.getMessage());
@@ -82,7 +82,7 @@ public class InfoMetrics implements Runnable {
                 jedis.close();
             }
         }
-        metricWriteHelper.printMetric(configuration.getMetricPrefix() + "|" + server.get("name") + "|" + "connectionStatus", String.valueOf(connectionStatus), "AVERAGE", "AVERAGE", "INDIVIDUAL");
+        finalMetricList.add(new Metric("HeartBeat", String.valueOf(heartbeat), configuration.getMetricPrefix() + "|" + server.get("name") + "|" + "HeartBeat", "AVERAGE", "AVERAGE", "INDIVIDUAL"));
         return infoFromRedis;
     }
 
