@@ -94,4 +94,32 @@ public class InfoMetricsTest {
             org.junit.Assert.assertTrue(metricPathsList.contains(metric.getMetricPath()));
         }
     }
+
+
+    @Test
+    public void whenConnectionFailsShouldReturnFailedHeartBeatTest() throws IOException{
+        ArgumentCaptor<List> pathCaptor = ArgumentCaptor.forClass(List.class);
+        MonitorContextConfiguration monitorContextConfiguration = mock(MonitorContextConfiguration.class);
+        Map<String, ?> rootElem = YmlReader.readFromFileAsMap(new File("src/test/resources/conf/config.yml"));
+        doReturn(rootElem).when(monitorContextConfiguration).getConfigYml();
+        when(monitorContextConfiguration.getMetricPrefix()).thenReturn("Server|Component:AppLevels|Custom Metrics|Redis");
+        MetricWriteHelper metricWriteHelper = mock(MetricWriteHelper.class);
+        JedisPool jedisPool = mock(JedisPool.class);
+        Jedis jedis = mock(Jedis.class);
+        CountDownLatch countDownLatch = new CountDownLatch(1);
+        when(jedisPool.getResource()).thenReturn(jedis);
+        when(jedis.info()).thenThrow(new RuntimeException());
+        Map<String, String> server = Maps.newHashMap();
+        server.put("host", "localhost");
+        server.put("port", "6379");
+        server.put("name", "Server1");
+        InfoMetrics redisMetrics = new InfoMetrics(monitorContextConfiguration, server, metricWriteHelper,jedisPool, countDownLatch);
+        redisMetrics.run();
+        verify(metricWriteHelper).transformAndPrintMetrics(pathCaptor.capture());
+        List<String> metricPathsList = Lists.newArrayList();
+        metricPathsList.add("Server|Component:AppLevels|Custom Metrics|Redis|Server1|HeartBeat");
+        for (Metric metric : (List<Metric>)pathCaptor.getValue()){
+            org.junit.Assert.assertTrue(metricPathsList.contains(metric.getMetricPath()));
+        }
+    }
 }

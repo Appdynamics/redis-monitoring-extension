@@ -53,8 +53,10 @@ public class InfoMetrics implements Runnable {
             infoMap = (Map<String, ?>)metricsMap.get("Info");
             AssertUtils.assertNotNull(infoMap, "There is no 'Info' metrics section under 'metrics' in config.yml");
             info = extractInfo();
-            finalMetricList = extractMetricsList();
-            logger.debug("Printing Info metrics for server {}", server.get("name"));
+            if(info != null) {
+                finalMetricList = extractMetricsList();
+                logger.debug("Printing Info metrics for server {}", server.get("name"));
+            }
             metricWriteHelper.transformAndPrintMetrics(finalMetricList);
         }
         catch(Exception e){
@@ -69,20 +71,20 @@ public class InfoMetrics implements Runnable {
         int heartbeat = 0;
         String infoFromRedis = null;
         Jedis jedis = null;
-        try{
+        try {
             jedis = jedisPool.getResource();
             infoFromRedis = jedis.info();
             heartbeat = 1;
         }
         catch(Exception e){
-            logger.error(e.getMessage());
+            logger.error("Error while collecting info metrics", e);
         }
         finally {
             if(jedis != null) {
                 jedis.close();
             }
+            finalMetricList.add(new Metric("HeartBeat", String.valueOf(heartbeat), configuration.getMetricPrefix() + "|" + server.get("name") + "|" + "HeartBeat", "AVERAGE", "AVERAGE", "INDIVIDUAL"));
         }
-        finalMetricList.add(new Metric("HeartBeat", String.valueOf(heartbeat), configuration.getMetricPrefix() + "|" + server.get("name") + "|" + "HeartBeat", "AVERAGE", "AVERAGE", "INDIVIDUAL"));
         return infoFromRedis;
     }
 
