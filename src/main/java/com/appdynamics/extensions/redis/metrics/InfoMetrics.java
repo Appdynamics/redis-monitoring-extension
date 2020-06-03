@@ -8,7 +8,7 @@
 package com.appdynamics.extensions.redis.metrics;
 
 import com.appdynamics.extensions.MetricWriteHelper;
-import com.appdynamics.extensions.conf.MonitorConfiguration;
+import com.appdynamics.extensions.conf.MonitorContextConfiguration;
 import com.appdynamics.extensions.metrics.Metric;
 import com.appdynamics.extensions.redis.utils.InfoMapExtractor;
 import com.appdynamics.extensions.util.AssertUtils;
@@ -31,13 +31,13 @@ public class InfoMetrics implements Runnable {
     private Map<String, ?> metricsMap;
     private Map<String, ?> infoMap;
     private List<Metric> finalMetricList;
-    private MonitorConfiguration configuration;
-    private Map<String, String> server;
+    private MonitorContextConfiguration configuration;
+    private Map<String, ?> server;
     private MetricWriteHelper metricWriteHelper;
     private static final Logger logger = LoggerFactory.getLogger(InfoMetrics.class);
     private CountDownLatch countDownLatch;
 
-    public InfoMetrics(MonitorConfiguration configuration, Map<String, String> server, MetricWriteHelper metricWriteHelper, JedisPool jedisPool, CountDownLatch countDownLatch) {
+    public InfoMetrics(MonitorContextConfiguration configuration, Map<String, ?> server, MetricWriteHelper metricWriteHelper, JedisPool jedisPool, CountDownLatch countDownLatch) {
         this.configuration = configuration;
         this.server = server;
         this.metricWriteHelper = metricWriteHelper;
@@ -53,12 +53,14 @@ public class InfoMetrics implements Runnable {
             infoMap = (Map<String, ?>)metricsMap.get("Info");
             AssertUtils.assertNotNull(infoMap, "There is no 'Info' metrics section under 'metrics' in config.yml");
             info = extractInfo();
-            finalMetricList = extractMetricsList();
-            logger.debug("Printing Info metrics for server {}", server.get("name"));
+            if(info != null) {
+                finalMetricList = extractMetricsList();
+                logger.debug("Printing Info metrics for server {}", server.get("name"));
+            }
             metricWriteHelper.transformAndPrintMetrics(finalMetricList);
         }
         catch(Exception e){
-            logger.error(e.getMessage());
+            logger.error("Error while collecting and printing info metrics", e);
         }
         finally {
             countDownLatch.countDown();
@@ -66,23 +68,23 @@ public class InfoMetrics implements Runnable {
     }
 
     private String extractInfo(){
-        int connectionStatus = 0;
+        int heartbeat = 0;
         String infoFromRedis = null;
         Jedis jedis = null;
-        try{
+        try {
             jedis = jedisPool.getResource();
             infoFromRedis = jedis.info();
-            connectionStatus = 1;
+            heartbeat = 1;
         }
         catch(Exception e){
-            logger.error(e.getMessage());
+            logger.error("Error while collecting info metrics", e);
         }
         finally {
             if(jedis != null) {
                 jedis.close();
             }
+            finalMetricList.add(new Metric("HeartBeat", String.valueOf(heartbeat), configuration.getMetricPrefix() + "|" + server.get("name") + "|" + "HeartBeat", "AVERAGE", "AVERAGE", "INDIVIDUAL"));
         }
-        metricWriteHelper.printMetric(configuration.getMetricPrefix() + "|" + server.get("name") + "|" + "connectionStatus", String.valueOf(connectionStatus), "AVERAGE", "AVERAGE", "INDIVIDUAL");
         return infoFromRedis;
     }
 

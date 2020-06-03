@@ -2,7 +2,7 @@
 #metricPrefix: "Custom metrics|Redis"
 
 #The following prefix will populate the metrics under one tier
-metricPrefix: "Server|Component:AppLevels|Custom metrics|Redis"
+metricPrefix: "Server|Component:AppLevels|Custom Metrics|Redis"
 
 #Add your list of Redis servers here.
 servers:
@@ -10,6 +10,7 @@ servers:
     host: "localhost"
     port: "6379"
     password: ""
+    useSSL: false
 
 
 
@@ -23,117 +24,81 @@ metrics:
     Slowlog:
         - no_of_new_slow_logs:
             alias: "no_of_new_slow_logs"
-            multiplier: ""
-            aggregateAtCluster: "true"
 
     Info:
         Clients: #Information about the client connections
             - connected_clients: #Number of client connections (excluding connections from slaves)
                 alias: "connected_clients"
-                multiplier: "2.0"
             - client_longest_output_list: #Longest output list among current client connections
                 alias: "client_longest_output_list"
-                multiplier: ""
-                aggregateAtCluster: "true"
             - client_biggest_input_buf: #Biggest input buffer among current client connections
                 alias: "client_biggest_input_buf"
-                multiplier: ""
-                aggregateAtCluster: "true"
             - blocked_clients: #Number of clients pending on a blocking call(BLPOP, BRPOP, BRPOPLPUSH)
                 alias: "blocked_clients"
-                multiplier: ""
-                aggregateAtCluster: "true"
 
         Memory: #Information about the memory consumption
             - used_memory: #Total number of bytes allocated by Redis using its allocator (either standard libc, jemalloc, or an alternative allocator such as tcmalloc
                 alias: "used_memory"
-                multiplier: ""
             - used_memory_rss: #Number of bytes that Redis allocated as seen by the operating system (a.k.a resident set size). This is the number reported by tools such as top(1) and ps(1)
                 alias: "used_memory_rss"
-                multiplier: ""
             - used_memory_peak: #Peak memory consumed by Redis (in bytes)
                 alias: "used_memory_peak"
-                multiplier: ""
             - used_memory_lua: #Number of bytes used by the Lua engine
                 alias: "used_memory_lua"
-                multiplier: ""
             - mem_fragmentation_ratio: #Ratio between used_memory_rss and used_memory
                 alias: "mem_fragmentation_ratio"
-                multiplier: ""
 
         Persistence: #Information related to RDB and AOF
             - rdb_changes_since_last_save: #Number of changes since the last dump
                 alias: "rdb_changes_since_last_save"
-                multiplier: ""
             - rdb_last_bgsave_time_sec: #Duration of the last RDB save operation in seconds
                 alias: "rdb_last_bgsave_time_sec"
-                multiplier: ""
             - rdb_current_bgsave_time_sec: #Duration of the on-going RDB save operation if any
                 alias: "rdb_current_bgsave_time_sec"
-                multiplier: ""
             - aof_last_rewrite_time_sec: #Duration of the last AOF rewrite operation in seconds
                 alias: "aof_last_rewrite_time_sec"
-                multiplier: ""
             - aof_current_rewrite_time_sec: #Duration of the on-going AOF rewrite operation if any
                 alias: "aof_current_rewrite_time_sec"
-                multiplier: ""
 
         Stats: #General statistics
             - total_connections_received:  #Total number of connections accepted by the server
                 alias: "total_connections_received"
-                multiplier: ""
             - total_commands_processed: #Total number of commands processed by the server
                 alias: "total_commands_processed"
-                multiplier: ""
             - instantaneous_ops_per_sec: #Number of commands processed per second
                 alias: "instantaneous_ops_per_sec"
-                multiplier: ""
             - rejected_connections: #Number of connections rejected because of maxclients limit
                 alias: "rejected_connections"
-                multiplier: ""
             - expired_keys: #Total number of key expiration events
                 alias: "expired_keys"
-                multiplier: ""
             - evicted_keys: #Number of evicted keys due to maxmemory limit
                 alias: "evicted_keys"
-                multiplier: ""
             - keyspace_hits: #Number of successful lookup of keys in the main dictionary
                 alias: "keyspace_hits"
-                multiplier: ""
             - keyspace_misses: #Number of failed lookup of keys in the main dictionary
                 alias: "keyspace_misses"
-                multiplier: ""
             - pubsub_channels: #Global number of pub/sub channels with client subscriptions
                 alias: "pubsub_channels"
-                multiplier: ""
             - pubsub_patterns: #Global number of pub/sub pattern with client subscriptions
                 alias: "pubsub_patterns"
-                multiplier: ""
             - latest_fork_usec: #Duration of the latest fork operation in microseconds
                 alias: "latest_fork_usec"
-                multiplier: ""
             - keyspace_hit_ratio:
                 alias: "keyspace_hit_ratio"
-                multiplier: ""
 
         Replication: #Information related to Master/Slave replication
             - connected_slaves: #Number of connected slaves
                 alias: "connected_slaves"
-                multiplier: ""
 
         CPU: #Information related to CPU consumption
             - used_cpu_sys: #System CPU consumed by the Redis server
                 alias: "used_cpu_sys"
-                multiplier: ""
             - used_cpu_user: #User CPU consumed by the Redis server
                 alias: "used_cpu_user"
-                multiplier: ""
             - used_cpu_sys_children: #System CPU consumed by the background processes
                 alias: "used_cpu_sys_children"
-                multiplier: ""
             - used_cpu_user_children: #User CPU consumed by the background processes
                 alias: "used_cpu_user_children"
-                multiplier: ""
 
 
 
