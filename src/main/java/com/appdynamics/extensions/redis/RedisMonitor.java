@@ -46,20 +46,18 @@ public class RedisMonitor extends ABaseMonitor {
     protected void doRun(TasksExecutionServiceProvider serviceProvider) {
         previousTimeStamp = currentTimeStamp;
         currentTimeStamp = System.currentTimeMillis();
-        List<Map<String,String>> servers = (List<Map<String,String>>)configuration.getConfigYml().get("servers");
+        List<Map<String,?>> servers = (List<Map<String,?>>)getContextConfiguration().getConfigYml().get("servers");
         AssertUtils.assertNotNull(servers, "The 'servers' section in config.yml is not initialised");
-        for (Map<String, String> server : servers) {
-            RedisMonitorTask task = new RedisMonitorTask(serviceProvider, server, previousTimeStamp, currentTimeStamp);
-            serviceProvider.submit(server.get("name"),task);
+        for (Map<String, ?> server : servers) {
+            RedisMonitorTask task = new RedisMonitorTask(getContextConfiguration(), serviceProvider, server, previousTimeStamp, currentTimeStamp);
+            serviceProvider.submit((String)server.get("name"),task);
         }
     }
 
     @Override
-    protected int getTaskCount() {
-        List<Map<String,String>> servers = (List<Map<String,String>>)configuration.getConfigYml().get("servers");
+    protected List<Map<String, ?>> getServers() {
+        List<Map<String,?>> servers = (List<Map<String,?>>)getContextConfiguration().getConfigYml().get("servers");
         AssertUtils.assertNotNull(servers, "The 'servers' section in config.yml is not initialised");
-        return servers.size();
+        return servers;
     }
-
-
 }

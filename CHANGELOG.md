@@ -1,5 +1,9 @@
 # Redis Monitoring Extension
 
+## 3.0.0 - May, 2020
+1. Updated to new extensions framework(2.2.3).
+2. Added the SSL connection ability from the extension.
+
 ## 2.0.2 - Feb 22, 2019
 1. Fixed the documentation bug in config.yml.
 

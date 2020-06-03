@@ -18,29 +18,33 @@ package com.appdynamics.extensions.redis;
 import com.appdynamics.extensions.AMonitorTaskRunnable;
 import com.appdynamics.extensions.MetricWriteHelper;
 import com.appdynamics.extensions.TasksExecutionServiceProvider;
-import com.appdynamics.extensions.conf.MonitorConfiguration;
-import com.appdynamics.extensions.crypto.CryptoUtil;
+import com.appdynamics.extensions.conf.MonitorContextConfiguration;
+import com.appdynamics.extensions.util.CryptoUtils;
+import com.appdynamics.extensions.util.SSLUtils;
 import com.google.common.base.Strings;
-import com.google.common.collect.Maps;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.JedisPoolConfig;
 
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLParameters;
+import javax.net.ssl.SSLSocketFactory;
 import java.util.Map;
 
 class RedisMonitorTask implements AMonitorTaskRunnable {
 
     private static final Logger logger = LoggerFactory.getLogger(RedisMonitorTask.class);
-    private MonitorConfiguration configuration;
-    private Map<String, String> server;
+    private MonitorContextConfiguration contextConfiguration;
+    private Map<String, ?> server;
     private MetricWriteHelper metricWriteHelper;
     private long previousTimeStamp;
     private long currentTimeStamp;
     private JedisPool jedisPool;
 
-    RedisMonitorTask(TasksExecutionServiceProvider serviceProvider, Map<String, String> server, long previousTimeStamp, long currentTimeStamp) {
-        this.configuration = serviceProvider.getMonitorConfiguration();
+    RedisMonitorTask(MonitorContextConfiguration contextConfiguration, TasksExecutionServiceProvider serviceProvider, Map<String, ?> server, long previousTimeStamp, long currentTimeStamp) {
+        this.contextConfiguration = contextConfiguration;
         this.server = server;
         this.metricWriteHelper = serviceProvider.getMetricWriteHelper();
         this.previousTimeStamp = previousTimeStamp;
@@ -52,53 +56,39 @@ class RedisMonitorTask implements AMonitorTaskRunnable {
     }
 
     private void populateAndPrintMetrics() {
-        String host = server.get("host");
-        String port = server.get("port");
-        String name = server.get("name");
+        String host = (String) server.get("host");
+        String port = (String) server.get("port");
+        String name = (String) server.get("name");
+        Boolean useSSL = (Boolean) server.get("useSSL");
         if(!Strings.isNullOrEmpty(host) && !Strings.isNullOrEmpty(port) && !Strings.isNullOrEmpty(name)) {
             int portNumber = Integer.parseInt(port);
-            String password = getPassword(server);
+            String password = CryptoUtils.getPassword(server);
             JedisPoolConfig jedisPoolConfig = buildJedisPoolConfig();
-            if (password.trim().length() != 0) {
-                try {
-                    jedisPool = new JedisPool(jedisPoolConfig, host, portNumber, 2000, password);
 
-                }
-                catch (Exception e) {
-                    logger.error("Exception while creating JedisPool" + e);
-                }
+            if (password.trim().length() != 0) {
+                password = null;
             }
-            else {
+            SSLSocketFactory sslSocketFactory = null;
+            SSLParameters sslParameters = null;
+            HostnameVerifier hostnameVerifier = null;
+
+            if(contextConfiguration.getConfigYml().get("connection") != null) {
                 try {
-                    jedisPool = new JedisPool(jedisPoolConfig, host, portNumber);
+                    SSLContext sslContext = SSLUtils.createSSLContext(null, contextConfiguration.getConfigYml());
+                    sslSocketFactory = sslContext.getSocketFactory();
+                    sslParameters = sslContext.getSupportedSSLParameters();
+                } catch (Exception e) {
+                    logger.debug("Failed to create custom SSLContext, falling back on the Java default SSLContext", e);
                 }
-                catch (Exception e) {
-                    logger.error("Exception while creating JedisPool" + e);
-                }
+                hostnameVerifier = SSLUtils.createHostNameVerifier((Map<String, ?>) contextConfiguration.getConfigYml().get("connection"));
+                logger.debug("Created custom hostnameverifier");
             }
+            jedisPool = new JedisPool(jedisPoolConfig, host, portNumber, 2000, password, useSSL, sslSocketFactory, sslParameters, hostnameVerifier);
             getMetricsFromInfo(jedisPool);
         }
         else{
             logger.debug("The host, port and name fields of the server : {} need to be specified", server);
         }
-    }
-
-    private String getPassword(Map<String, String> server){
-        String password = server.get("password");
-        String encryptedPassword = server.get("encryptedPassword");
-        Map<String, ?> configMap = configuration.getConfigYml();
-        String encryptionKey = configMap.get("encryptionKey").toString();
-        if(!Strings.isNullOrEmpty(password)){
-            return password;
-        }
-        if(!Strings.isNullOrEmpty(encryptedPassword) && !Strings.isNullOrEmpty(encryptionKey)){
-            Map<String,String> cryptoMap = Maps.newHashMap();
-            cryptoMap.put("password-encrypted", encryptedPassword);
-            cryptoMap.put("encryption-key", encryptionKey);
-            logger.debug("Decrypting the ecncrypted password........");
-            return CryptoUtil.getPassword(cryptoMap);
-        }
-        return "";
     }
 
     private JedisPoolConfig buildJedisPoolConfig(){
@@ -108,14 +98,12 @@ class RedisMonitorTask implements AMonitorTaskRunnable {
     }
 
     private void getMetricsFromInfo(JedisPool jedisPool) {
-        RedisCommandHandler redisCommandHandler = new RedisCommandHandler(configuration, server, metricWriteHelper, jedisPool, previousTimeStamp, currentTimeStamp);
+        RedisCommandHandler redisCommandHandler = new RedisCommandHandler(contextConfiguration, server, metricWriteHelper, jedisPool, previousTimeStamp, currentTimeStamp);
         redisCommandHandler.triggerCommandsToRedisServer();
     }
 
     @Override
     public void onTaskComplete() {
-
-
     }
 }
 
