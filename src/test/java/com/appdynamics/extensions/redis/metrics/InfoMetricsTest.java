@@ -7,46 +7,20 @@
 
 package com.appdynamics.extensions.redis.metrics;
 
-import com.amazonaws.auth.AWSCredentials;
-import com.amazonaws.auth.AWSCredentialsProvider;
-import com.amazonaws.auth.BasicAWSCredentials;
-import com.amazonaws.client.AwsAsyncClientParams;
-import com.amazonaws.client.AwsSyncClientParams;
-import com.amazonaws.services.eventbridge.AmazonEventBridgeAsyncClientBuilder;
-import com.amazonaws.services.eventbridge.AmazonEventBridgeClient;
-import com.amazonaws.services.eventbridge.AmazonEventBridgeClientBuilder;
-import com.amazonaws.services.eventbridge.model.PutEventsRequest;
-import com.amazonaws.services.eventbridge.model.PutEventsRequestEntry;
-import com.appdynamics.extensions.ABaseMonitor;
-import com.appdynamics.extensions.AMonitorJob;
 import com.appdynamics.extensions.MetricWriteHelper;
-import com.appdynamics.extensions.conf.MonitorContext;
 import com.appdynamics.extensions.conf.MonitorContextConfiguration;
-import com.appdynamics.extensions.conf.modules.CustomDashboardModule;
-import com.appdynamics.extensions.conf.modules.DerivedMetricsModule;
 import com.appdynamics.extensions.metrics.Metric;
-import com.appdynamics.extensions.metrics.derived.DerivedMetricsCalculator;
 import com.appdynamics.extensions.yml.YmlReader;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.singularity.ee.agent.systemagent.api.MetricWriter;
 import org.apache.commons.io.FileUtils;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
-import org.yaml.snakeyaml.Yaml;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CountDownLatch;
@@ -139,31 +113,5 @@ public class InfoMetricsTest {
         for (Metric metric : (List<Metric>)pathCaptor.getValue()){
             org.junit.Assert.assertTrue(metricPathsList.contains(metric.getMetricPath()));
         }
-    }
-
-    @Test
-    public void awsTest() throws Exception {
-        String excelFilePath = "/Users/venkonal/Downloads/Test.xlsx";
-        FileInputStream inputStream = new FileInputStream(new File(excelFilePath));
-        Workbook workbook = new XSSFWorkbook(inputStream);
-        Sheet firstSheet = workbook.getSheetAt(0);
-        Iterator<Row> iterator = firstSheet.iterator();
-        int length = 1;
-        while (iterator.hasNext()) {
-            int count = 1;
-            Row nextRow = iterator.next();
-            Iterator<Cell> cellIterator = nextRow.cellIterator();
-            while (cellIterator.hasNext()) {
-                Cell cell = cellIterator.next();
-                if(count == 4 && cell.toString().contains("https://github.com/Appdynamics/")) {
-                    System.out.println(length + ". " + cell);
-                    length++;
-                }
-                count++;
-            }
-            System.out.println();
-        }
-        workbook.close();
-        inputStream.close();
     }
 }

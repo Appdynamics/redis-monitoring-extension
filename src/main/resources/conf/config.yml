@@ -38,6 +38,8 @@ encryptionKey: ""
 # So, please change the value accordingly(Based on the number of server instances you are monitoring).
 numberOfThreads: 21
 
+enableHealthChecks: false
+
 #                                      List of metrics
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 #Glossary of terms(These terms are used as properties for each metric):
