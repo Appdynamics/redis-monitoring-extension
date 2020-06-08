@@ -21,6 +21,7 @@ import com.appdynamics.extensions.TasksExecutionServiceProvider;
 import com.appdynamics.extensions.conf.MonitorContextConfiguration;
 import com.appdynamics.extensions.util.CryptoUtils;
 import com.appdynamics.extensions.util.SSLUtils;
+import com.appdynamics.extensions.util.StringUtils;
 import com.google.common.base.Strings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -72,7 +73,7 @@ class RedisMonitorTask implements AMonitorTaskRunnable {
             SSLParameters sslParameters = null;
             HostnameVerifier hostnameVerifier = null;
 
-            if(contextConfiguration.getConfigYml().get("connection") != null) {
+            if(useSSL == true && contextConfiguration.getConfigYml().get("connection") != null) {
                 try {
                     SSLContext sslContext = SSLUtils.createSSLContext(null, contextConfiguration.getConfigYml());
                     sslSocketFactory = sslContext.getSocketFactory();
@@ -83,7 +84,11 @@ class RedisMonitorTask implements AMonitorTaskRunnable {
                 hostnameVerifier = SSLUtils.createHostNameVerifier((Map<String, ?>) contextConfiguration.getConfigYml().get("connection"));
                 logger.debug("Created custom hostnameverifier");
             }
-            jedisPool = new JedisPool(jedisPoolConfig, host, portNumber, 2000, password, useSSL, sslSocketFactory, sslParameters, hostnameVerifier);
+            if (Strings.isNullOrEmpty(password)) {
+                jedisPool = new JedisPool(jedisPoolConfig, host, portNumber, 2000, useSSL, sslSocketFactory, sslParameters, hostnameVerifier);
+            } else {
+                jedisPool = new JedisPool(jedisPoolConfig, host, portNumber, 2000, password, useSSL, sslSocketFactory, sslParameters, hostnameVerifier);
+            }
             getMetricsFromInfo(jedisPool);
         }
         else{
