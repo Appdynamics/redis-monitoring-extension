@@ -65,15 +65,14 @@ class RedisMonitorTask implements AMonitorTaskRunnable {
             int portNumber = Integer.parseInt(port);
             String password = CryptoUtils.getPassword(server);
             JedisPoolConfig jedisPoolConfig = buildJedisPoolConfig();
-
-            if (password.trim().length() != 0) {
+            if (password.trim().length() == 0) {
                 password = null;
             }
             SSLSocketFactory sslSocketFactory = null;
             SSLParameters sslParameters = null;
             HostnameVerifier hostnameVerifier = null;
 
-            if(useSSL == true && contextConfiguration.getConfigYml().get("connection") != null) {
+            if(useSSL && contextConfiguration.getConfigYml().get("connection") != null) {
                 try {
                     SSLContext sslContext = SSLUtils.createSSLContext(null, contextConfiguration.getConfigYml());
                     sslSocketFactory = sslContext.getSocketFactory();

@@ -111,10 +111,6 @@ metrics:
             - used_cpu_user_children: #User CPU consumed by the background processes
                 alias: "used_cpu_user_children"
 
-derivedMetrics:
-    - derivedMetricPath: "{x}|Stats|keyspace_hit_ratio"
-      formula: "{x}|Stats|keyspace_hits / ({x}|Stats|keyspace_hits + {x}|Stats|keyspace_misses)"
-
 
 
 
