@@ -82,6 +82,7 @@ public class InfoMetricsTest {
         metricPathsList.add("Server|Component:AppLevels|Custom Metrics|Redis|Server1|CPU|used_cpu_user");
         metricPathsList.add("Server|Component:AppLevels|Custom Metrics|Redis|Server1|CPU|used_cpu_sys_children");
         metricPathsList.add("Server|Component:AppLevels|Custom Metrics|Redis|Server1|CPU|used_cpu_user_children");
+        metricPathsList.add("Server|Component:AppLevels|Custom Metrics|Redis|Server1|HeartBeat");
         for (Metric metric : (List<Metric>)pathCaptor.getValue()){
             org.junit.Assert.assertTrue(metricPathsList.contains(metric.getMetricPath()));
         }

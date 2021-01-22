@@ -9,7 +9,7 @@ servers:
     host: "localhost"
     port: "6379"
     password: ""
-    encryptedPassword: ""
+    #encryptedPassword: ""
     useSSL: false
 
 #Encryption key for Encrypted password.
@@ -18,8 +18,6 @@ encryptionKey: ""
 # Each server instance needs 3 threads, one for the server instance itself, one for info call to the Redis server and one for slowlog call to the server.
 # So, please change the value accordingly(Based on the number of server instances you are monitoring).
 numberOfThreads: 21
-
-enableHealthChecks: false
 
 #                                      List of metrics
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -110,12 +108,3 @@ metrics:
                 alias: "used_cpu_sys_children"
             - used_cpu_user_children: #User CPU consumed by the background processes
                 alias: "used_cpu_user_children"
-
-
-
-
-
-
-
-
-
