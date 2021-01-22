@@ -19,6 +19,7 @@ import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
+import redis.clients.jedis.JedisPoolConfig;
 import redis.clients.util.Slowlog;
 
 import java.io.File;
@@ -32,8 +33,23 @@ import static org.mockito.Mockito.*;
 
 public class SlowLogMetricsTest {
 
+
     @Test
-    public void slowogMetricsTest() throws IOException {
+    public void sampleTest() {
+        try {
+            JedisPoolConfig jedisPoolConfig = new JedisPoolConfig();
+            jedisPoolConfig.setMaxTotal(3);
+            JedisPool jedisPool = new JedisPool(jedisPoolConfig, "localhost", 6379, 2000, null, false, null, null, null);
+            Jedis jedis = jedisPool.getResource();
+            String info = jedis.info();
+            System.out.println(info);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Test
+    public void slowLogMetricsTest() {
 
         ArgumentCaptor<List> pathCaptor = ArgumentCaptor.forClass(List.class);
         AMonitorJob aMonitorJob = mock(AMonitorJob.class);

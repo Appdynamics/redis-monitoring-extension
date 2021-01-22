@@ -54,7 +54,7 @@ public class InfoMetrics implements Runnable {
             AssertUtils.assertNotNull(infoMap, "There is no 'Info' metrics section under 'metrics' in config.yml");
             info = extractInfo();
             if(info != null) {
-                finalMetricList = extractMetricsList();
+                finalMetricList.addAll(extractMetricsList());
                 logger.debug("Printing Info metrics for server {}", server.get("name"));
             }
             metricWriteHelper.transformAndPrintMetrics(finalMetricList);

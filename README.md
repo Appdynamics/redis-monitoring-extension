@@ -153,9 +153,11 @@ You can make the changes to config.yml and validate it from the browser or the A
 
 |                          |           |      
 |--------------------------|-----------|
-|Current version           |2.0.2      |
+|Current version           |3.0.1      |
+|Agent Compatibility       |4.5.13+ |
+|Controller Compatibility  |4.5+ |
 |Redis version tested on   |3.9, 4.0.8 |       |
-|Last Update               |02/22/2019 |
+|Last Update               |22/01/2021 |
 
 1.0.0 - Release version
 
@@ -178,6 +180,8 @@ You can make the changes to config.yml and validate it from the browser or the A
 2.0.1 - Added copyright, LICENSE.txt and NOTICE.txt.
 
 2.0.2 - Fixed the documentation bug in config.yml.
+
+3.0.1 - Updated to commons 2.2.4 and fixed issue for global encryptionKey and heartbeat metric
 
 ## Troubleshooting
 Please follow the steps specified in the [TROUBLESHOOTING](https://community.appdynamics.com/t5/Knowledge-Base/How-to-troubleshoot-missing-custom-metrics-or-extensions-metrics/ta-p/28695) document to debug problems faced while using the extension.
