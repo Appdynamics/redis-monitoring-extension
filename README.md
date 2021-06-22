@@ -94,18 +94,23 @@ Configure the Redis monitoring extension by editing the config.yml file in `<MAC
      ```
      **All these metric properties are optional, and the default value shown in the table is applied to the metric(if a property has not been specified) by default.**
      
-## Password encryption
-To avoid setting the clear text password in the config.yml, please follow the steps below to encrypt the password and set the encrypted password and the key in the config.yml:
-1. Download the util jar to encrypt the password from [here](https://github.com/Appdynamics/maven-repo/raw/master/releases/com/appdynamics/appd-exts-commons/2.0.0/appd-exts-commons-2.0.0.jar).
-2. Encrypt password from the command line using the following command :
-   ```
-   java -cp "appd-exts-commons-2.0.0.jar" com.appdynamics.extensions.crypto.Encryptor myKey myPassword
-   ```
-   where "myKey" is any random key,
-         "myPassword" is the actual password that needs to be encrypted
-3. Add the values for "encryptionKey", "encryptedPassword" in the config.yml. 
-   The value for "encryptionKey" is the value substituted for "myKey" in the above command.
-   The value for "encryptedPassword" is the result of the above command.  
+
+## Metrics
+     This extension uses [INFO](http://redis.io/commands/info) command to fetch metrics from Redis server. Some of the metrics are listed below:
+      * Clients: connected_clients, blocked_clients
+      * Memory: used_memory, used_memory_rss, used_memory_peak, used_memory_lua, mem_fragmentation_ratio
+      * Stats: total_connections_received, total_commands_processed, keyspace_hits, keyspace_misses, keyspace_hit_ratio
+      * Persistence: rdb_changes_since_last_save, aof_last_rewrite_time_sec
+      * replication: role (MASTER:1, SLAVE:0), connected_slaves
+      * CPU: used_cpu_sys, used_cpu_user, used_cpu_sys_children, used_cpu_user_children
+
+     This extension also uses [SLOWLOG](https://redis.io/commands/slowlog) to fetch metrics from Redis server.
+      * no_of_new_slow_logs -> This metric represents the number of new logs that were recorded as slowlogs(log queries that exceeded a specified
+                               execution time) since the extension has recorded in its previous run.
+        To use this metric, the "slowlog-log-slower-than" config parameter has to be set for the Redis server.
+
+     In addition to the above metrics, there is a metric called "connectionStatus" with a value 0 when the connection to Redis server failed and 1 when the
+     connection to the Redis server is successful.
 
 ## Credentials Encryption
 Please visit [this page](https://community.appdynamics.com/t5/Knowledge-Base/How-to-use-Password-Encryption-with-Extensions/ta-p/29397) to get detailed instructions on password encryption. The steps in this document will guide you through the whole process.
@@ -140,26 +145,6 @@ For any support related questions, you can also contact [help@appdynamics.com](m
 ## Contributing
 
 Always feel free to fork and contribute any changes directly here on [GitHub](https://github.com/Appdynamics/redis-monitoring-extension).
-   
-
-## Metrics
-     This extension uses [INFO](http://redis.io/commands/info) command to fetch metrics from Redis server. Some of the metrics are listed below:
-      * Clients: connected_clients, blocked_clients
-      * Memory: used_memory, used_memory_rss, used_memory_peak, used_memory_lua, mem_fragmentation_ratio
-      * Stats: total_connections_received, total_commands_processed, keyspace_hits, keyspace_misses, keyspace_hit_ratio
-      * Persistence: rdb_changes_since_last_save, aof_last_rewrite_time_sec
-      * replication: role (MASTER:1, SLAVE:0), connected_slaves
-      * CPU: used_cpu_sys, used_cpu_user, used_cpu_sys_children, used_cpu_user_children
-
-     This extension also uses [SLOWLOG](https://redis.io/commands/slowlog) to fetch metrics from Redis server.
-      * no_of_new_slow_logs -> This metric represents the number of new logs that were recorded as slowlogs(log queries that exceeded a specified
-                               execution time) since the extension has recorded in its previous run.
-        To use this metric, the "slowlog-log-slower-than" config parameter has to be set for the Redis server.
-
-     In addition to the above metrics, there is a metric called "connectionStatus" with a value 0 when the connection to Redis server failed and 1 when the
-     connection to the Redis server is successful.
-
-
 
 ## Version
 
