@@ -105,7 +105,42 @@ To avoid setting the clear text password in the config.yml, please follow the st
          "myPassword" is the actual password that needs to be encrypted
 3. Add the values for "encryptionKey", "encryptedPassword" in the config.yml. 
    The value for "encryptionKey" is the value substituted for "myKey" in the above command.
-   The value for "encryptedPassword" is the result of the above command.     
+   The value for "encryptedPassword" is the result of the above command.  
+
+## Credentials Encryption
+Please visit [this page](https://community.appdynamics.com/t5/Knowledge-Base/How-to-use-Password-Encryption-with-Extensions/ta-p/29397) to get detailed instructions on password encryption. The steps in this document will guide you through the whole process.
+
+## Extensions Workbench
+
+Workbench is an inbuilt feature provided with each extension in order to assist you to fine tune the extension setup before you actually deploy it on the controller. Please review the following document on [How to use the Extensions WorkBench](https://community.appdynamics.com/t5/Knowledge-Base/How-to-use-the-Extensions-WorkBench/ta-p/30130)
+
+## Troubleshooting
+
+Please follow the steps listed in this [troubleshooting-document](https://community.appdynamics.com/t5/Knowledge-Base/How-to-troubleshoot-missing-custom-metrics-or-extensions-metrics/ta-p/28695) in order to troubleshoot your issue. These are a set of common issues that customers might have faced during the installation of the extension. If these don't solve your issue, please follow the last step on the [troubleshooting-document](https://community.appdynamics.com/t5/Knowledge-Base/How-to-troubleshoot-missing-custom-metrics-or-extensions-metrics/ta-p/28695) to contact the support team.
+
+## Support Tickets
+
+If after going through the [Troubleshooting Document](https://community.appdynamics.com/t5/Knowledge-Base/How-to-troubleshoot-missing-custom-metrics-or-extensions-metrics/ta-p/28695) you have not been able to get your extension working, please file a ticket and add the following information.
+
+Please provide the following in order for us to assist you better.
+
+1. Stop the running machine agent.
+2. Delete all existing logs under `<MachineAgent>/logs`.
+3. Please enable debug logging by editing the file `<MachineAgent>/conf/logging/log4j.xml`. Change the level value of the following `<logger>` elements to debug.
+   ```
+   <logger name="com.singularity">
+   <logger name="com.appdynamics">
+   ```
+4. Start the machine agent and please let it run for 10 mins. Then zip and upload all the logs in the directory `<MachineAgent>/logs/*`.
+5. Attach the zipped `<MachineAgent>/conf/*` directory here.
+6. Attach the zipped `<MachineAgent>/monitors/ExtensionFolderYouAreHavingIssuesWith` directory here.
+   
+For any support related questions, you can also contact [help@appdynamics.com](mailto:help@appdynamics.com).
+
+## Contributing
+
+Always feel free to fork and contribute any changes directly here on [GitHub](https://github.com/Appdynamics/redis-monitoring-extension).
+   
 
 ## Metrics
      This extension uses [INFO](http://redis.io/commands/info) command to fetch metrics from Redis server. Some of the metrics are listed below:
@@ -124,30 +159,7 @@ To avoid setting the clear text password in the config.yml, please follow the st
      In addition to the above metrics, there is a metric called "connectionStatus" with a value 0 when the connection to Redis server failed and 1 when the
      connection to the Redis server is successful.
 
-## Workbench
-Workbench is a feature by which you can preview the metrics before registering it with the controller. This is useful if you want to fine tune the configurations. Workbench is embedded into the extension jar.
-To use the workbench, follow all the steps in installation and configuration.
 
-1. Start the workbench with the following command if you are in &lt;MACHINE_AGENT_HOME&gt;
-
-```
-      java -jar /monitors/RedisMonitor/redis-monitoring-extension.jar 
-```      
-This starts an http server at http://host:9090/. This can be accessed from the browser.
-
-2. If the server is not accessible from outside/browser, you can use the following end points to see the list of registered metrics and errors.
-
-    Get the stats:
-    ```
-    curl http://localhost:9090/api/stats
-    ```
-    Get the registered metrics:
-    ```
-    curl http://localhost:9090/api/metric-paths
-    ```
-You can make the changes to config.yml and validate it from the browser or the API
-
-3. Once the configuration is complete, you can kill the workbench and start the Machine Agent.
 
 ## Version
 
@@ -158,39 +170,3 @@ You can make the changes to config.yml and validate it from the browser or the A
 |Controller Compatibility  |4.5+ |
 |Redis version tested on   |3.9, 4.0.8 |       |
 |Last Update               |22/01/2021 |
-
-1.0.0 - Release version
-
-1.0.1 - Code Optimization. 
-
-1.0.2 - Support for role metrics
-
-1.0.3 - Revamped and Added more metrics. 
-
-1.0.4 - JDK 1.6 compatible
-
-1.0.5 - Added commandstats and keyspace_hit_ratio
-
-1.0.6 - Added code fixes
-
-1.0.7 - Fix for includePatterns
-
-2.0.0 - Revamped the extension to support new extensions framework(2.0.0), Added new metrics like "no_of_new_slow_logs", "connectionStatus
-
-2.0.1 - Added copyright, LICENSE.txt and NOTICE.txt.
-
-2.0.2 - Fixed the documentation bug in config.yml.
-
-3.0.1 - Updated to commons 2.2.4 and fixed issue for global encryptionKey and heartbeat metric
-
-## Troubleshooting
-Please follow the steps specified in the [TROUBLESHOOTING](https://community.appdynamics.com/t5/Knowledge-Base/How-to-troubleshoot-missing-custom-metrics-or-extensions-metrics/ta-p/28695) document to debug problems faced while using the extension.
-
-## Contributing
-Always feel free to fork and contribute any changes directly via [GitHub](https://github.com/Appdynamics/redis-monitoring-extension).
-
-## Community
-Find out more in the [AppSphere](https://www.appdynamics.com/community/exchange/extension/redis-monitoring-extension/) community.
-
-## Support
-For any questions or feature request, please contact [AppDynamics Support](mailto:help@appdynamics.com).
