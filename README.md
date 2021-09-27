@@ -8,14 +8,16 @@ The Redis monitoring extension can monitor multiple Redis servers and display th
 
 ## Prerequisites
 1. Before the extension is installed, the prerequisites mentioned [here](https://community.appdynamics.com/t5/Knowledge-Base/Extensions-Prerequisites-Guide/ta-p/35213) need to be met. Please do not proceed with the extension installation if the specified prerequisites are not met.
-2. This extension creates a java client to the Redis server that needs to be monitored. So the Redis server that has to be monitored, should be available
+2. Download and install [Apache Maven](https://maven.apache.org/) which is configured with `Java 8` to build the extension artifact from source. You can check the java version used in maven using command `mvn -v` or `mvn --version`. If your maven is using some other java version then please download java 8 for your platform and set JAVA_HOME parameter before starting maven.
+3. This extension creates a java client to the Redis server that needs to be monitored. So the Redis server that has to be monitored, should be available
    for access from the machine that has the extension installed.
 
 ## Installation
-1. Run 'mvn clean install' from "RedisMonitorRepo".
-2. Unzip the `RedisMonitor-<version>.zip` from `target` directory into the "<MachineAgent_Dir>/monitors" directory.
-3. Edit the file config.yml located at <MachineAgent_Dir>/monitors/RedisMonitor referring to configurations section below.
-4. Restart the Machine Agent.
+1. Clone the "redis-monitoring-extension" repo using `git clone <repoUrl>` command.
+2. Run 'mvn clean install' from "redis-monitoring-extension".
+3. Unzip the `RedisMonitor-<version>.zip` from `target` directory into the "<MachineAgent_Dir>/monitors" directory.
+4. Edit the file config.yml located at <MachineAgent_Dir>/monitors/RedisMonitor referring to configurations section below.
+5. Restart the Machine Agent.
 
 ## Recommendations
 It is recommended that a single Redis monitoring extension be used to monitor multiple Redis servers belonging to a single cluster.
