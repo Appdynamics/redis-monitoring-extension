@@ -1,5 +1,9 @@
 # Redis Monitoring Extension
 
+## 3.0.2 - Sept, 2024
+1. Updated ext commons with vulnerability fixes.
+2. Fixed junit vulnerability.
+
 ## 3.0.1 - Jan, 2021
 1. Updated to new extensions framework(2.2.4).
 2. Fixed issue for global encryptionKey
