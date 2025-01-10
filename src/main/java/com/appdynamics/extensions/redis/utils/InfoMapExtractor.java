@@ -51,6 +51,7 @@ public class InfoMapExtractor {
     }
 
     private String removeInvalidCharacters(String metric) {
-        return metric.replaceAll("%", "");
+        return metric.replaceAll("%", "")
+                .replaceAll("count=", "");
     }
 }
