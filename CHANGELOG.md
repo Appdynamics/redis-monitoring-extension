@@ -1,5 +1,8 @@
 # Redis Monitoring Extension
 
+## 3.0.3 - Jan, 2025
+1. Fix a problem with "count="
+
 ## 3.0.2 - Sept, 2024
 1. Updated ext commons with vulnerability fixes.
 2. Fixed junit vulnerability.
